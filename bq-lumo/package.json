@@ -1,0 +1,9 @@
+{
+  "name": "bq-lumo",
+  "version": "0.1.0",
+  "dependencies": {
+    "puppeteer": "^2.1.0",
+    "@google-cloud/bigquery": "^4.0.0",
+    "@google-cloud/storage": "^4.0.0"
+  }
+}
