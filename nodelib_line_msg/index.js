@@ -1,6 +1,6 @@
 const line = require('@line/bot-sdk');
 const client = new line.Client({
-  channelAccessToken: '/D6B+5TCvORkRjXa5Ae2lXu9msGgLKwXFjdkDcDxI42pm5sc6JqxXKDCGZVeOb1Q6b7pYv03I2lGMayQ2dTS6rWVoAgvlWQwuADIp0hAtxjDh83B9mCWpjwmbAWx1sKR3+GQa+KrAsmxcNZs84U/8QdB04t89/1O/w1cDnyilFU='
+  channelAccessToken: process.env.LINE
 }); // https://line.github.io/line-bot-sdk-nodejs/#getting-started
 
 

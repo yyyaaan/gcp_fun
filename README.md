@@ -17,7 +17,11 @@ For NodeJS environment, run `npm install` to install based on `package.json`;
 
 For Python enviroment, run `pip install -r requirements.txt`.
 
-## Useful command
+# Environment Variables
+
+For Line messaging API `LINE` is configured for Channel Access Token
+
+# Useful command
 
 ```
 git clone https://github.com/yyyaaan/gcp_fun
