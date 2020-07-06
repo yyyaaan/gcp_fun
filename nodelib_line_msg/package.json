@@ -1,0 +1,7 @@
+{
+  "name": "lib-line-messaging",
+  "version": "0.0.1",
+  "dependencies": {
+    "@line/bot-sdk": "^7.0.0"
+  }
+}

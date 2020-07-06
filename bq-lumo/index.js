@@ -1,5 +1,9 @@
 const puppeteer = require('puppeteer');
 const {BigQuery} = require('@google-cloud/bigquery');
+const line = require('@line/bot-sdk');
+const client = new line.Client({
+  channelAccessToken: '/D6B+5TCvORkRjXa5Ae2lXu9msGgLKwXFjdkDcDxI42pm5sc6JqxXKDCGZVeOb1Q6b7pYv03I2lGMayQ2dTS6rWVoAgvlWQwuADIp0hAtxjDh83B9mCWpjwmbAWx1sKR3+GQa+KrAsmxcNZs84U/8QdB04t89/1O/w1cDnyilFU='
+});
 const bigquery = new BigQuery({projectId: 'yyyaaannn'}); //remove projectID in production
 const req_url = 'https://lumo.fi/vuokra-asunnot/';
 
@@ -9,6 +13,18 @@ async function insert_to_bigquery(all_data) {
 	console.log(`LUMO: Inserted ${all_data.length} rows to bigquery`);
 }
 
+function send_to_line(msg) {
+    const message = {type: 'text', text: msg};
+    client.broadcast(message)
+}
+
+function prettify(data, rows){
+    const regex = /[\[\{\}\]":]|(apt)/g;
+    const outdt = data.slice(0, rows);
+    const dttxt = JSON.stringify(outdt).replace(regex, '').replace(/,/g, '\n');
+    const dltxt = "Total rows " + data.length + "\n";
+    return (dltxt + dttxt);
+}
 
 async function fetch_webpage(maxn){
 	// start browser and block pictures
@@ -81,14 +97,28 @@ exports.main = (async (req, res) => {
 	all_data = await fetch_webpage(maxn);
 	await insert_to_bigquery(all_data);
 
+    msg_data = all_data.map((element) => ({
+        apt: element.address + ' -- '  + element.rent + ' EUR (' + element.size + ' sq.m)'
+    }));
+    msg_text = prettify(msg_data, 10);
+    send_to_line(msg_text);
+
     res.status(200).send(`Job completed: inserted ${all_data.length} rows`);
 });
 
 
 //debug function, remove on deployment
 async function run_it() {
-	all_data = await fetch_webpage(9);
-	await insert_to_bigquery(all_data);	
+	all_data = await fetch_webpage(1);
+
+    msg_data = all_data.map((element) => ({
+        apt: element.address + ' -- '  + element.rent + ' EUR (' + element.size + ' sq.m)'
+    }));
+    msg_text = prettify(msg_data, 10);
+    //send_to_line(msg_text);
+	//await insert_to_bigquery(all_data);	
+    
+    console.log( msg_text)
 }
 
 run_it();
