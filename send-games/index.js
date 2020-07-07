@@ -1,16 +1,71 @@
 const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
 const client = new line.Client({channelAccessToken: process.env.LINEY});
-const req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures';
+const max_bubbles = 8;
 
 
-function send_to_line(msg) {
-    const message = {type: 'text', text: msg};
-    client.broadcast(message)
+function line_broadcast_flex(msg_obj, alt_txt) {
+    const message = {type: "flex", altText: alt_txt, contents: msg_obj}
+    try{
+        client.broadcast(message)
+    } catch(e) {
+        console.log(e)
+    }
 }
 
 
-async function fetch_webpage(){
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
+function line_carousel(all_data){
+    var bubble_array = [];
+    for(i = 0; i < Math.min(all_data.length, max_bubbles); i++){
+
+        cur_array = all_data[i].map((element) => ({
+            type: "text",
+            size: "xs",
+            text: ((parseInt(element.time.substring(0, 2)) + 2) + 
+                    element.time.substring(2, 5) + 
+                    ' ' + element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' ')
+        }));
+
+        bubble_array.push({
+            "type":"bubble",
+            "size":"kilo",
+            "header":{
+                "type":"box",
+                "layout":"vertical",
+                "contents":[{
+                    "type":"text",
+                    "text": all_data[i][0].fa,
+                    "color":"#ffffff",
+                    "align":"start",
+                    "size":"md",
+                    "gravity":"center"
+                }],
+                "backgroundColor": getRandomColor(),
+            },
+            "body":{
+                "type":"box",
+                "layout":"vertical",
+                "contents": cur_array,
+                "spacing":"md",
+                "paddingAll":"12px"
+            }
+        })
+    }
+    return {type: 'carousel', contents: bubble_array};
+}
+
+
+async function fetch_webpage(req_url){
 	// start browser and block pictures
     const browser = await puppeteer.launch({
         headless: true, 
@@ -28,24 +83,29 @@ async function fetch_webpage(){
     // read web and get data
     await page.goto(req_url, {waitUntil: 'networkidle0'});
     await page.waitForSelector('div.qa-match-block');
+    await page.screenshot({path: 'screen.png', fullPage: true});
 
+    // return 2d array [[games in FA], [games in FA]]
     var all_data = await page.evaluate(() => {
         var all_data = [];
         var all_fas = document.querySelectorAll('div.qa-match-block');
+        var regex1 = /\d{1,2}:\d{2}/;
 
         for (var i = 0; i < all_fas.length; i++){
+            var cur_data = [];
             var faname = all_fas[i].querySelector('h3').innerText.trim();
             var games = all_fas[i].querySelectorAll('li');
             if(games){
                 for(var j = 0; j < games.length; j++){
-                    all_data.push({
-                        FA: faname,
-                        Time: games[j].querySelector('.sp-c-fixture__block--time').innerText.trim(),
-                        Home: games[j].querySelector('.sp-c-fixture__team--time-home').innerText.trim(),
-                        Away: games[j].querySelector('.sp-c-fixture__team--time-away').innerText.trim()
+                    cur_data.push({
+                        fa: faname,
+                        time: String(regex1.exec(games[j].innerText)),
+                        home: games[j].querySelector('span:nth-child(1)').innerText, 
+                        away: games[j].querySelector('span:nth-child(3)').innerText
                     })
                 }
             }
+            all_data[i] = cur_data;
         }
         return all_data;
     });
@@ -56,22 +116,22 @@ async function fetch_webpage(){
 
 
 exports.main = (async (req, res) => {
-	var all_data = await fetch_webpage(1);
 
-    var the_fa = "NA";
-    var outtxt = "Today's Games (Finnish Time)";
-    for(i = 0; i < all_data.length; i++){
-        if(the_fa != all_data[i].FA){
-            the_fa = all_data[i].FA;
-            outtxt = outtxt + '\n\n' + the_fa;
-        }
-        timefin = (parseInt(all_data[i].Time.substring(0, 2)) + 2) + all_data[i].Time.substring(2, 5);
-        outtxt = outtxt + '\n' + timefin + ' ' + all_data[i].Home + ' vs ' + all_data[i].Away;
+    var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
+    if(req.query.days){
+        var d = new Date();
+        d.setDate(d.getDate() + parseInt(req.query.days));
+        req_url = req_url + d.toISOString().substring(0, 10)
     }
 
-    if(req.query.flag) send_to_line(outtxt);    
-    res.status(200).send(outtxt);
+	var all_data = await fetch_webpage(req_url);
+    var msg_obj = line_carousel(all_data);
+    console.log(JSON.stringify(msg_obj));
+    line_broadcast_flex(msg_obj, "Today's Games");
+
+    // res.status(200).send(JSON.stringify(msg_obj));
 });
 
 
-//exports.main("a", "b");
+var req = {query:{xdays: '0'}}
+exports.main(req, "b");
