@@ -5,6 +5,10 @@ A collection of multiple Google Cloud Functions. Currently implemented:
 
 All GET parameters are optional.
 
+# Messaging API Comsuption
+
+[Line Dev](https://developers.line.biz/en/reference/messaging-api/#get-consumption)
+
 # Cloud Shell Tips
 
 Additional packages are required for debugging nodejs and puppeteer/chrome.
