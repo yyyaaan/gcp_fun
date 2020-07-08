@@ -1,4 +1,4 @@
-req = {
+msg_text = {
    "events":[
       {
          "type":"message",
@@ -19,9 +19,21 @@ req = {
    "destination":"Uce2bad78ad5c947be21bbb1924854173"
 };
 
-const linereq = req.events[0];
-const linemsg = linereq.message;
-const linetkn = linereq.replyToken;
-const linetxt = linemsg.text;
-
-console.log("We recieved your message \"" + linetxt + "\" with token", linetkn);
+msg_postback = {
+    events: [
+      {
+        source: {
+            userId: "U791544f1b5f204dde1a7f7fa2fa4486c",
+            type: "user"
+        },
+        replyToken: "28334b7af52e4634b21996ba3baeeee4",
+        mode: "active",
+        postback: {
+            data: "action=buy&itemid=123"
+        },
+        timestamp: 1594230236891,
+        type: "postback",
+      }
+    ],
+    destination: "U21ddff11fc82268d8551c21b4019ee6c",
+};

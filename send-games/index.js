@@ -83,7 +83,6 @@ async function fetch_webpage(req_url){
     // read web and get data
     await page.goto(req_url, {waitUntil: 'networkidle0'});
     await page.waitForSelector('div.qa-match-block');
-    await page.screenshot({path: 'screen.png', fullPage: true});
 
     // return 2d array [[games in FA], [games in FA]]
     var all_data = await page.evaluate(() => {
