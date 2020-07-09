@@ -21,8 +21,11 @@ exports.main = (async (request, response) => {
         // agent.add('webhook ok Preparing schedules...(~30 seconds)');
         console.log(agent.parameters);
         const lineMessage = await line_rich_schedule(0);
+        agent.add(new Payload('line', lineMessage));
         var payload = new Payload('line', lineMessage, {sendAsMessage: true});
+        console.log(payload);
         agent.add(payload);
+
     }
 
     async function lumo(agent){
