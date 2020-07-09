@@ -1,9 +1,8 @@
 // this is a webhook for DiaglogFlow; integration is handled there
 // https://googleapis.dev/nodejs/dialogflow/latest/index.html
-const {WebhookClient} = require('dialogflow-fulfillment');
-const {Card, Suggestion} = require('dialogflow-fulfillment');
+// https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/src/dialogflow-fulfillment.js
 
-// import my modules
+const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
 const {bq_status, bq_lumo_topn } = require('./query-bq.js');
 const {line_rich_schedule} = require('./bbc-sports.js');
 
@@ -18,19 +17,17 @@ exports.main = (async (request, response) => {
         agent.add(`Welcome to my agent! (default webhook)`);
     }
 
-    function fallback(agent) {
-        agent.add(`I didn't understand`);
-        agent.add(`I'm sorry, can you try again?`);
-    }
-
     async function sports(agent){
         agent.add('webhook ok Preparing schedules...(~30 seconds)');
+        console.log(agent.parameters);
         const lineMessage = await line_rich_schedule(0);
         var payload = new Payload('LINE', lineMessage, {sendAsMessage: true});
         agent.add(payload);
     }
 
     async function lumo(agent){
+        var param_n = 9
+        if(agent.parameters.number) param_n = agent.parameters.number;
         var out = await bq_lumo_topn(9);
         agent.add(out);
     }
@@ -51,3 +48,7 @@ exports.main = (async (request, response) => {
     agent.handleRequest(intentMap);
 });
 
+
+
+
+// (async ()=> {})();
