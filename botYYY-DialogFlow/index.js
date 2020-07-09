@@ -18,17 +18,17 @@ exports.main = (async (request, response) => {
     }
 
     async function sports(agent){
-        agent.add('webhook ok Preparing schedules...(~30 seconds)');
+        // agent.add('webhook ok Preparing schedules...(~30 seconds)');
         console.log(agent.parameters);
         const lineMessage = await line_rich_schedule(0);
-        var payload = new Payload('LINE', lineMessage, {sendAsMessage: true});
+        var payload = new Payload('line', lineMessage, {sendAsMessage: true});
         agent.add(payload);
     }
 
     async function lumo(agent){
         var param_n = 9
         if(agent.parameters.number) param_n = agent.parameters.number;
-        var out = await bq_lumo_topn(9);
+        var out = await bq_lumo_topn(param_n);
         agent.add(out);
     }
 
