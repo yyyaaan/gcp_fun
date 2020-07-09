@@ -1,5 +1,4 @@
 {
-  "name": "line-botYYY",
   "version": "0.9.1",
   "dependencies": {
     "puppeteer": "^2.1.0",

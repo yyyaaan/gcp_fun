@@ -1,3 +1,5 @@
+// USE DIALOGFLOW
+
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery = new BigQuery(); // {projectId: 'yyyaaannn'} remove projectID in production
 const line = require('@line/bot-sdk');

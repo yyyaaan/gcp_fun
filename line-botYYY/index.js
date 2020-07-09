@@ -8,7 +8,7 @@ const max_bubbles = 8;
 
 function reply_to_line(tkn, msg) {
     const message = {type: 'text', text: msg};
-    console.log("sending reply to " + tkn + ' text:' + msg.replace(/\\n/g, '|'));
+    console.log("sending reply to " + tkn + ' text:' + msg.replace(/\n/g, '|'));
     client.replyMessage(tkn, message).catch((err) => { console.log(err.toString())});
 }
 
@@ -22,7 +22,7 @@ function reply_flex(tkn, msg_obj, alt_txt) {
 
 function prettify(bqrows){
     const regex = /[\[\{\}\]"]|(tss..)|(value..)|(apt..)/g;
-    const dttxt = JSON.stringify(bqrows).replace(/\},\{/g, '\n').replace(regex, '');
+    const dttxt = JSON.stringify(bqrows).replace(/\},\{/g, '\n').replace(regex, '').replace(/--/g, '\n');
     return dttxt;
 }
 
@@ -48,7 +48,7 @@ async function bq_status(dataset) {
 // handle top lumo results in bq (LUMO N) //
 ////////////////////////////////////////////
 async function bq_lumo_topn(n) {
-    const sqlQuery = `SELECT address, size, rent
+    const sqlQuery = `SELECT address, area, floor, size, rent
     FROM \`yyyaaannn.Explore.LUMO01\`
     where tss = (select max(tss) from \`yyyaaannn.Explore.LUMO01\`)
     order by rent desc
@@ -56,8 +56,9 @@ async function bq_lumo_topn(n) {
 
     const [rows] = await bigquery.query({query: sqlQuery});
     pretty_rows = rows.map((element) => ({
-        apt: element.address + ' -- '  + element.rent + '\u20AC (' + element.size + '\u33A1 ~' + 
-             Math.round(element.rent / element.size)  + '\u20AC/\u33A1)'
+        apt: element.address + ', ' + element.area + ' -- '  + 
+            element.rent + '\u20AC ' + element.floor + 'F ' + element.size + 
+            '\u33A1 (~' + Math.round(element.rent / element.size)  + '\u20AC/\u33A1)'
     }));
     console.log(`Fetched ${rows.length} rows from BigQuery`);
     return pretty_rows;
@@ -85,6 +86,7 @@ function line_carousel(all_data){
         cur_array = all_data[i].map((element) => ({
             type: "text",
             size: "xs",
+            wrap: true,
             text: ((parseInt(element.time.substring(0, 2)) + 2) + 
                     element.time.substring(2, 5) + 
                     ' ' + element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' ')
@@ -239,5 +241,5 @@ exports.main = (async (req, res) => {
 
 // debugging function
 (async ()=> {
-    await handle_msg_text("TOKEN", "schedule 10");
+    await handle_msg_text("TOKEN", "lumo 10");
 })();
