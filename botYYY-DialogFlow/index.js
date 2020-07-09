@@ -15,7 +15,7 @@ exports.main = (async (request, response) => {
 
     // hooks for different intentions
     function welcome(agent) {
-        agent.add(`Welcome to my agent!`);
+        agent.add(`Welcome to my agent! (default webhook)`);
     }
 
     function fallback(agent) {
@@ -24,19 +24,20 @@ exports.main = (async (request, response) => {
     }
 
     async function sports(agent){
-        agent.add('webhook ok Trying to find apartments...please wait');
-        var out = await line_rich_schedule(0);
-        agent.add({"line": out});
+        agent.add('webhook ok Preparing schedules...(~30 seconds)');
+        const lineMessage = await line_rich_schedule(0);
+        var payload = new Payload('LINE', lineMessage, {sendAsMessage: true});
+        agent.add(payload);
     }
 
     async function lumo(agent){
-        agent.add('webhook ok Trying to find apartments...please wait');
         var out = await bq_lumo_topn(9);
         agent.add(out);
     }
 
     function googleAssistantHandler(agent) {
         let conv = agent.conv(); // Get Actions on Google library conv instance
+        agent.add('default fall back - google assistant');
         conv.ask('Hello from the Actions on Google client library!'); // Use Actions on Google library
         agent.add(conv); // Add Actions on Google library responses to your agent's response
     }
