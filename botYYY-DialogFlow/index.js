@@ -5,12 +5,17 @@
 const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
 const {bq_status, bq_lumo_topn } = require('./query-bq.js');
 const {line_rich_schedule} = require('./bbc-sports.js');
-
+var long_processing; // handle long runing promise
+var line_replyToken;
  
 exports.main = (async (request, response) => {
-    const agent = new WebhookClient({ request, response });
-    console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
-    console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+    const agent = new WebhookClient({request, response});
+    console.log({'Dialogflow Request headers': request.headers});
+    console.log({'Dialogflow Request body:':  request.body});
+    console.log({
+        orgSource: body.originalDetectIntentRequest.source,
+        orgToken: body.originalDetectIntentRequest.payload.data.replyToken
+    });
 
     // hooks for different intentions
     function welcome(agent) {
@@ -18,14 +23,9 @@ exports.main = (async (request, response) => {
     }
 
     async function sports(agent){
-        // agent.add('webhook ok Preparing schedules...(~30 seconds)');
         console.log(agent.parameters);
-        const lineMessage = await line_rich_schedule(0);
-        agent.add(new Payload('line', lineMessage));
-        var payload = new Payload('line', lineMessage, {sendAsMessage: true});
-        console.log(payload);
-        agent.add(payload);
-
+        agent.add('webhook ok Preparing schedules...(~30 seconds)');
+        long_processing = line_rich_schedule(0); // NO AWAIT, handle later
     }
 
     async function lumo(agent){
@@ -49,6 +49,10 @@ exports.main = (async (request, response) => {
     intentMap.set('A-BQ Lumo', lumo);
     intentMap.set('A-PP sports', sports);
     agent.handleRequest(intentMap);
+
+
+    // hanlde long_processing
+    long_processing.then( (val) => console.log(val) );
 });
 
 
