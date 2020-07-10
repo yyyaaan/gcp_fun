@@ -1,16 +1,17 @@
 {
     "version": "0.0.1",
     "dependencies": {
-        "puppeteer": "^2.1.0",
-        "@google-cloud/bigquery": "^4.0.0",
-        "@google-cloud/storage": "^4.0.0",
+        "puppeteer": "^5.0.0",
+        "@line/bot-sdk": "^7.0.0",
+        "@google-cloud/bigquery": "^5.0.0",
+        "@google-cloud/storage": "^5.0.0",
         "actions-on-google": "^2.2.0",
-        "dialogflow": "^0.7.0",
+        "dialogflow": "^1.0.0",
         "dialogflow-fulfillment": "^0.6.1"
     },
     "comments": {
-        "@line/bot-sdk": "^7.0.0",
         "firebase-admin": "^5.13.1",
-        "firebase-functions": "^2.0.2"
+        "firebase-functions": "^2.0.2",
+        "doc": "https://semver.npmjs.com/"
     }
 }

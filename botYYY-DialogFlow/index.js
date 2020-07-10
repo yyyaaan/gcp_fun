@@ -5,15 +5,18 @@
 const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
 const {bq_status, bq_lumo_topn } = require('./query-bq.js');
 const {line_rich_schedule} = require('./bbc-sports.js');
-var long_processing; // handle long runing promise
+const {line_reply_flex} = require('./line_direct.js');
+
+// handle long runing promise for LINE
+var long_processing; 
 var line_replyToken;
  
+
 exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
     line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
-    console.log('captured token' + line_replyToken + new String(request.body.originalDetectIntentRequest.source));
 
     // hooks for different intentions
     function welcome(agent) {
@@ -50,10 +53,16 @@ exports.main = (async (request, response) => {
 
 
     // hanlde long_processing
-    long_processing.then( (val) => console.log(val) );
+    if(long_processing){
+        if(request.body.originalDetectIntentRequest.source.toLowerCase() === 'line'){
+            console.log('captured token' + line_replyToken);
+            long_processing.then( (val) => line_reply_flex(line_replyToken, val, "Your requested schedule"));
+        }
+    }
 });
 
 
-
-
-// (async ()=> {})();
+// (async ()=> {
+//     const out = await line_rich_schedule(0);
+//     console.log(out);
+// })();
