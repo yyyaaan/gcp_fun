@@ -52,15 +52,6 @@ exports.main = (async (request, response) => {
     intentMap.set('A-BQ Lumo', lumo);
     intentMap.set('A-PP sports', sports);
     agent.handleRequest(intentMap);
-
-
-    // hanlde long_processing
-    if(long_processing){
-        if(request.body.originalDetectIntentRequest.source.toLowerCase() === 'line'){
-            console.log('captured token for LINE: ' + line_replyToken);
-            await long_processing.then((val) => line_reply_flex(line_replyToken, val, "Your requested schedule"));
-        }
-    }
 });
 
 
