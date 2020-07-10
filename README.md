@@ -2,6 +2,7 @@ A collection of multiple Google Cloud Functions. Currently implemented:
 
 - __qr-trend__ (GET q_route, q_ddate, q_rdate [Link](https://europe-west1-yyyaaannn.cloudfunctions.net/qr-trend?q_route=Helsinki%20Canberra|Sydney%20Helsinki&q_ddate=2021-06-01&q_rdate=2021-06-17))
 - __bq-lumo__ (GET maxn [Link](https://europe-west1-yyyaaannn.cloudfunctions.net/bq-lumo?max_n=1)) _Submitted to Cloud Scheduler_
+- __send-games__ broadcasting require GET days;
 
 All GET parameters are optional.
 

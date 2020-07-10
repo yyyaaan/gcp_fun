@@ -1,6 +1,7 @@
 {
   "version": "0.9.1",
   "dependencies": {
+    "https": "1",
     "puppeteer": "^2.1.0",
     "@google-cloud/bigquery": "^4.0.0",
     "@google-cloud/storage": "^4.0.0",

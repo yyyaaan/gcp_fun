@@ -3,6 +3,7 @@ const {BigQuery} = require('@google-cloud/bigquery');
 const line = require('@line/bot-sdk');
 const bigquery = new BigQuery(); // 
 const client = new line.Client({channelAccessToken: process.env.LINEY});
+const https = require("https");
 const max_bubbles = 8;
 
 
@@ -204,8 +205,11 @@ async function handle_msg_text(replyToken, cmd){
                 reply_to_line(replyToken, prettify(out));
                 break;
             case "SCHEDULE":
-                var msg_obj = await ppt_schedule(parseInt(texts[1], 10));
-                reply_flex(replyToken, msg_obj, "Football Games");
+                // var msg_obj = await ppt_schedule(parseInt(texts[1], 10));
+                // reply_flex(replyToken, msg_obj, "Football Games");
+                var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games?replyToken=" + replyToken;
+                https.get(ext_url, res => {console.log('fired external:' + ext_url)})
+        
                 break;
             default:
                 reply_to_line(replyToken, out);

@@ -12,7 +12,6 @@ exports.main = (async (request, response) => {
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
     const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
-    const line_destination = 'U21ddff11fc82268d8551c21b4019ee6c';
 
     // hooks for different intentions
     function welcome(agent) {
@@ -20,15 +19,15 @@ exports.main = (async (request, response) => {
     }
 
     async function sports(agent){
-        agent.add('webhook ok Preparing schedules...(~30 seconds)');
         // call external with replyToken and possible date
         var ext_url = 'https://europe-west2-yyyaaannn.cloudfunctions.net/send-games' +
                   + '?replyToken=' + line_replyToken
-                  + '&destination=' + line_destination;
+                  + '&test=yes'; // test set reply to the non-BotYY
         if(agent.parameters.date) {
             ext_url = ext_url + '&date=' + agent.parameters.date.substring(0, 10)
         }
-        https.get(ext_url, res => {console.log('fired external link for sports');})
+        https.get(ext_url, res => {console.log('fired external:' + ext_url)})
+        // agent.add('webhook ok Preparing schedules...(~30 seconds)');
     }
 
     async function lumo(agent){

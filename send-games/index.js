@@ -3,6 +3,7 @@
 const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
 const max_bubbles = 8;
+var lineClient;
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
@@ -117,41 +118,41 @@ async function fetch_webpage(req_url){
 
 exports.main = (async (req, res) => {
 
-    var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
+    if(req.query.test){
+        lineClient = new line.Client({channelAccessToken: process.env.LINE});
+    } else {
+        lineClient = new line.Client({channelAccessToken: process.env.LINEY});
+    }
 
-    // Scenario 1: broadcasting, called by scheduler
+
+    // changing requested date
+    var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
     if(req.query.days){
         var d = new Date();
         d.setDate(d.getDate() + parseInt(req.query.days));
         req_url = req_url + d.toISOString().substring(0, 10);
+    } else if(req.query.date){
+        req_rul = req_url + req.query.date.substring(0, 10)
+    } 
 
+
+    // Scenario 1: broadcasting, called by scheduler
+    if(req.query.broadcast){
         var all_data = await fetch_webpage(req_url);
         var richMessage = {
             type: "flex", 
             altText: "Your requested schedule", 
             contents: line_carousel(all_data)};
 
-        lineClient = new line.Client({channelAccessToken: process.env.LINEY});
         lineClient
-            .pushMessage('U791544f1b5f204dde1a7f7fa2fa4486c', richMessage)
-            // .broadcast(richMessage)
+            .broadcast(richMessage)
             .catch((err) => { console.log(err.toString()) });
 
-        // console.log("Broadcasting " + JSON.stringify(richMessage));
+        console.log("Broadcasting " + JSON.stringify(richMessage));
     }
 
     // Scenario 2: reply to user, need to determine client by destination
     if(req.query.replyToken){
-
-        if(req.query.date){
-            req_rul = req_url + req.query.date.substring(0, 10)
-        }
-
-        if(req.query.destination === 'U21ddff11fc82268d8551c21b4019ee6c'){
-            lineClient = new line.Client({channelAccessToken: process.env.LINEY});
-        } else {
-            lineClient = new line.Client({channelAccessToken: process.env.LINE});
-        }
 
         var all_data = await fetch_webpage(req_url);
         var richMessage = {
@@ -163,18 +164,22 @@ exports.main = (async (req, res) => {
             .replyMessage(req.query.replyToken, richMessage)
             .catch((err) => { console.log(err.toString()) });
 
-        console.log("sending reply to " + tkn + ' with ' + JSON.stringify(richMessage));
+        console.log("sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
     }
 
-    res.status(200).send('ok');
+    res.status(200).send('request recieved');
 });
 
 
 var req = {query:{
     days: '0', 
+    broadcast: 'yes',
+    test: 'yes'
+
     // destination: 'U21ddff11fc82268d8551c21b4019ee6c',
     // replyToken: 'test',
     }}
+
 exports.main(req, "b");
 
 (async()=> {
