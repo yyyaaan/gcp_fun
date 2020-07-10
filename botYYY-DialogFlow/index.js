@@ -9,13 +9,11 @@ var long_processing; // handle long runing promise
 var line_replyToken;
  
 exports.main = (async (request, response) => {
-    const agent = new WebhookClient({request, response});
-    console.log({'Dialogflow Request headers': request.headers});
-    console.log({'Dialogflow Request body:':  request.body});
-    console.log({
-        orgSource: body.originalDetectIntentRequest.source,
-        orgToken: body.originalDetectIntentRequest.payload.data.replyToken
-    });
+    const agent = new WebhookClient({ request, response });
+    console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
+    console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+    line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
+    console.log('captured token' + line_replyToken + new String(request.body.originalDetectIntentRequest.source));
 
     // hooks for different intentions
     function welcome(agent) {
@@ -24,8 +22,8 @@ exports.main = (async (request, response) => {
 
     async function sports(agent){
         console.log(agent.parameters);
-        agent.add('webhook ok Preparing schedules...(~30 seconds)');
         long_processing = line_rich_schedule(0); // NO AWAIT, handle later
+        agent.add('webhook ok Preparing schedules...(~30 seconds)');
     }
 
     async function lumo(agent){
