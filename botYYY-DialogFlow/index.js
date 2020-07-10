@@ -55,14 +55,11 @@ exports.main = (async (request, response) => {
     // hanlde long_processing
     if(long_processing){
         if(request.body.originalDetectIntentRequest.source.toLowerCase() === 'line'){
-            console.log('captured token' + line_replyToken);
-            long_processing.then( (val) => line_reply_flex(line_replyToken, val, "Your requested schedule"));
+            console.log('captured token for LINE: ' + line_replyToken);
+            await long_processing.then((val) => line_reply_flex(line_replyToken, val, "Your requested schedule"));
         }
     }
 });
 
 
-// (async ()=> {
-//     const out = await line_rich_schedule(0);
-//     console.log(out);
-// })();
+// (async ()=> {})();
