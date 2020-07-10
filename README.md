@@ -43,3 +43,8 @@ git add .
 git commit -m ""
 git push -u origin master
 ```
+
+```
+du -h --max-depth=1 /path/to/directory
+rm -rv ~/.local/share/Trash/*
+```

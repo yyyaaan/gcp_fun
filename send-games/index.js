@@ -1,18 +1,8 @@
+// Fulfillment: (1) daily broadcast (2) reply by token and client
+
 const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
-const client = new line.Client({channelAccessToken: process.env.LINEY});
 const max_bubbles = 8;
-
-
-function line_broadcast_flex(msg_obj, alt_txt) {
-    const message = {type: "flex", altText: alt_txt, contents: msg_obj}
-    try{
-        client.broadcast(message)
-    } catch(e) {
-        console.log(e)
-    }
-}
-
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
@@ -28,12 +18,20 @@ function line_carousel(all_data){
     var bubble_array = [];
     for(i = 0; i < Math.min(all_data.length, max_bubbles); i++){
 
-        cur_array = all_data[i].map((element) => ({
-            type: "text",
-            size: "xs",
-            text: ((parseInt(element.time.substring(0, 2)) + 2) + 
-                    element.time.substring(2, 5) + 
-                    ' ' + element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' ')
+        nice_data = all_data[i].map((element) => ({
+            a: ((parseInt(element.time.substring(0, 2)) + 2) + 
+                element.time.substring(2, 5) +
+                element.note + ' ').replace(/NaNll|\n/g, ''),
+            b: (element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' '),
+        }));
+
+        // console.log(nice_data);
+
+        cur_array = nice_data.map((element) => ({
+            type: "box",
+            layout: "horizontal",
+            contents: [{type: "text", size: "xs", wrap: true, weight: "bold", text: element.a},
+                       {type: "text", size: "xs", wrap: true, flex: 4, text: element.b}] 
         }));
 
         bubble_array.push({
@@ -63,6 +61,8 @@ function line_carousel(all_data){
     }
     return {type: 'carousel', contents: bubble_array};
 }
+
+
 
 
 async function fetch_webpage(req_url){
@@ -100,7 +100,8 @@ async function fetch_webpage(req_url){
                         fa: faname,
                         time: String(regex1.exec(games[j].innerText)),
                         home: games[j].querySelector('span:nth-child(1)').innerText, 
-                        away: games[j].querySelector('span:nth-child(3)').innerText
+                        away: games[j].querySelector('span:nth-child(3)').innerText,
+                        note: games[j].querySelector('aside').innerText
                     })
                 }
             }
@@ -117,20 +118,67 @@ async function fetch_webpage(req_url){
 exports.main = (async (req, res) => {
 
     var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
+
+    // Scenario 1: broadcasting, called by scheduler
     if(req.query.days){
         var d = new Date();
         d.setDate(d.getDate() + parseInt(req.query.days));
-        req_url = req_url + d.toISOString().substring(0, 10)
+        req_url = req_url + d.toISOString().substring(0, 10);
+
+        var all_data = await fetch_webpage(req_url);
+        var richMessage = {
+            type: "flex", 
+            altText: "Your requested schedule", 
+            contents: line_carousel(all_data)};
+
+        lineClient = new line.Client({channelAccessToken: process.env.LINEY});
+        lineClient
+            .pushMessage('U791544f1b5f204dde1a7f7fa2fa4486c', richMessage)
+            // .broadcast(richMessage)
+            .catch((err) => { console.log(err.toString()) });
+
+        // console.log("Broadcasting " + JSON.stringify(richMessage));
     }
 
-	var all_data = await fetch_webpage(req_url);
-    var msg_obj = line_carousel(all_data);
-    console.log(JSON.stringify(msg_obj));
-    line_broadcast_flex(msg_obj, "Today's Games");
+    // Scenario 2: reply to user, need to determine client by destination
+    if(req.query.replyToken){
 
-    // res.status(200).send(JSON.stringify(msg_obj));
+        if(req.query.date){
+            req_rul = req_url + req.query.date.substring(0, 10)
+        }
+
+        if(req.query.destination === 'U21ddff11fc82268d8551c21b4019ee6c'){
+            lineClient = new line.Client({channelAccessToken: process.env.LINEY});
+        } else {
+            lineClient = new line.Client({channelAccessToken: process.env.LINE});
+        }
+
+        var all_data = await fetch_webpage(req_url);
+        var richMessage = {
+            type: "flex", 
+            altText: "Your requested schedule", 
+            contents: line_carousel(all_data)}
+
+        lineClient
+            .replyMessage(req.query.replyToken, richMessage)
+            .catch((err) => { console.log(err.toString()) });
+
+        console.log("sending reply to " + tkn + ' with ' + JSON.stringify(richMessage));
+    }
+
+    res.status(200).send('ok');
 });
 
 
-var req = {query:{xdays: '0'}}
+var req = {query:{
+    days: '0', 
+    // destination: 'U21ddff11fc82268d8551c21b4019ee6c',
+    // replyToken: 'test',
+    }}
 exports.main(req, "b");
+
+(async()=> {
+    var out = await fetch_webpage('https://www.bbc.com/sport/football/scores-fixtures');
+    console.log(out);
+})();
+

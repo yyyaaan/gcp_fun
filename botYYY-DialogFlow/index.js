@@ -4,19 +4,15 @@
 
 const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
 const {bq_status, bq_lumo_topn } = require('./query-bq.js');
-const {line_rich_schedule} = require('./bbc-sports.js');
-const {line_reply_flex} = require('./line_direct.js');
+const https = require("https");
 
-// handle long runing promise for LINE
-var long_processing; 
-var line_replyToken;
- 
 
 exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
-    line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
+    const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
+    const line_destination = 'U21ddff11fc82268d8551c21b4019ee6c';
 
     // hooks for different intentions
     function welcome(agent) {
@@ -24,13 +20,19 @@ exports.main = (async (request, response) => {
     }
 
     async function sports(agent){
-        console.log(agent.parameters);
-        long_processing = line_rich_schedule(0); // NO AWAIT, handle later
         agent.add('webhook ok Preparing schedules...(~30 seconds)');
+        // call external with replyToken and possible date
+        var ext_url = 'https://europe-west2-yyyaaannn.cloudfunctions.net/send-games' +
+                  + '?replyToken=' + line_replyToken
+                  + '&destination=' + line_destination;
+        if(agent.parameters.date) {
+            ext_url = ext_url + '&date=' + agent.parameters.date.substring(0, 10)
+        }
+        https.get(ext_url, res => {console.log('fired external link for sports');})
     }
 
     async function lumo(agent){
-        var param_n = 9
+        var param_n = 9;
         if(agent.parameters.number) param_n = agent.parameters.number;
         var out = await bq_lumo_topn(param_n);
         agent.add(out);
