@@ -33,6 +33,8 @@ exports.main = (async (request, response) => {
             ext_url = ext_url + "&date=" + agent.parameters.date.substring(0, 10)
         }
         https.get(ext_url, res => {console.log('fired external:' + ext_url)});
+        agent.add('we are preparing your schedule... ~30 seconds');
+        agent.add('Hold on...');
     }
 
 
