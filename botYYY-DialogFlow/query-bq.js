@@ -57,7 +57,7 @@ async function agent_lumo(agent){
 
 async function agent_bqstatus(agent){
     var dtname = "QR01";
-    if(agent.parameters.dtname) dtname = agent.parameters.dtname.toUpperCase();
+    if(agent.parameters['bigqurey-dtname']) dtname = agent.parameters['bigqurey-dtname'].toUpperCase();
     agent.add(await bq_status(dtname));
 }
 

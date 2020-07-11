@@ -1,9 +1,10 @@
-// Fulfillment: (1) daily broadcast (2) reply by token and client
+// Fulfillment: (1) daily broadcast (2) reply by token and client (3) push message by userId
 
 const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
 const max_bubbles = 8;
 var lineClient;
+
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
@@ -25,8 +26,6 @@ function line_carousel(all_data){
                 element.note + ' ').replace(/NaNll|\n/g, ''),
             b: (element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' '),
         }));
-
-        // console.log(nice_data);
 
         cur_array = nice_data.map((element) => ({
             type: "box",
@@ -124,7 +123,6 @@ exports.main = (async (req, res) => {
         lineClient = new line.Client({channelAccessToken: process.env.LINEY});
     }
 
-
     // changing requested date
     var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
     if(req.query.days){
@@ -135,36 +133,36 @@ exports.main = (async (req, res) => {
         req_rul = req_url + req.query.date.substring(0, 10)
     } 
 
+    // fetch from bbc sports
+    var all_data = await fetch_webpage(req_url);
+    var richMessage = {
+        type: "flex", 
+        altText: "Your requested schedule", 
+        contents: line_carousel(all_data)
+    };
 
     // Scenario 1: broadcasting, called by scheduler
     if(req.query.broadcast){
-        var all_data = await fetch_webpage(req_url);
-        var richMessage = {
-            type: "flex", 
-            altText: "Your requested schedule", 
-            contents: line_carousel(all_data)};
-
         lineClient
             .broadcast(richMessage)
             .catch((err) => { console.log(err.toString()) });
-
         console.log("Broadcasting " + JSON.stringify(richMessage));
     }
 
     // Scenario 2: reply to user, need to determine client by destination
     if(req.query.replyToken){
-
-        var all_data = await fetch_webpage(req_url);
-        var richMessage = {
-            type: "flex", 
-            altText: "Your requested schedule", 
-            contents: line_carousel(all_data)}
-
         lineClient
             .replyMessage(req.query.replyToken, richMessage)
             .catch((err) => { console.log(err.toString()) });
-
         console.log("sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
+    }
+
+    // Scenario 3: push message, this has to be use due to DialogFlow limitation (push is payable)
+    if(req.query.userId){
+        lineClient
+            .pushMessage(req.query.userId, richMessage)
+            .catch((err) => { console.log(err.toString()) });
+        console.log("Pushing to " + req.query.userId + ' with ' + JSON.stringify(richMessage));
     }
 
     res.status(200).send('request recieved');

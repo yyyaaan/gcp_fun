@@ -16,9 +16,9 @@ async function insert_to_bigquery(all_data) {
 function prettify(raw_data){
     better_data = raw_data.map((element) => ({
         apt: element.address + ', ' + element.area + '--  '  + 
-            element.rent + '\u20AC ' + element.floor + 'F ' + element.size + 
-            '\u33A1 (~' + Math.round(element.rent / element.size)  + '\u20AC/\u33A1\u00B7month)' +
-            '  https://lumo.fi' + element.href
+             element.rent + '\u20AC ' + element.floor + 'F ' + element.size + 
+             '\u33A1 (~' + Math.round(element.rent / element.size)  + '\u20AC/\u33A1\u00B7month)' +
+             (element.href ? ('  https://lumo.fi' + element.href) : '' )
     }));
 
     const dttxt = JSON.stringify(better_data)
@@ -131,7 +131,7 @@ exports.main = (async (req, res) => {
     }
     await insert_to_bigquery(all_data);
     info_msg = `Total rows ${all_data.length} (pushed ${new_ones.length})\n` +
-                prettify(new10.slice(0,9));
+                prettify(all_data.slice(0,9));
     client.broadcast({ type: 'text', text: info_msg}); 
 
     res.status(200).send(`Job completed: inserted ${all_data.length} rows`);
@@ -139,4 +139,4 @@ exports.main = (async (req, res) => {
 
 
 //debug function, remove on deployment
-exports.main({query:{maxn: "9"}}, null);
+exports.main({query:{maxn: "1"}}, null);
