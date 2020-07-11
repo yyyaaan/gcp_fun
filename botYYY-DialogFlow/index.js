@@ -3,8 +3,8 @@
 // https://github.com/dialogflow/dialogflow-fulfillment-nodejs/blob/master/src/dialogflow-fulfillment.js
 
 const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
-const {bq_status, bq_lumo_topn } = require('./query-bq.js');
-const https = require("https");
+const {agent_bqstatus, agent_lumo} = require('./query-bq.js');
+const {agent_schedule} = require('./forward-requst.js')
 
 
 exports.main = (async (request, response) => {
@@ -15,26 +15,7 @@ exports.main = (async (request, response) => {
 
     // hooks for different intentions
     function welcome(agent) {
-        agent.add(`Welcome to my agent! (default webhook)`);
-    }
-
-    async function sports(agent){
-        // call external with replyToken and possible date
-        var ext_url = 'https://europe-west2-yyyaaannn.cloudfunctions.net/send-games' +
-                  + '?replyToken=' + line_replyToken
-                  + '&test=yes'; // test set reply to the non-BotYY
-        if(agent.parameters.date) {
-            ext_url = ext_url + '&date=' + agent.parameters.date.substring(0, 10)
-        }
-        https.get(ext_url, res => {console.log('fired external:' + ext_url)})
-        // agent.add('webhook ok Preparing schedules...(~30 seconds)');
-    }
-
-    async function lumo(agent){
-        var param_n = 9;
-        if(agent.parameters.number) param_n = agent.parameters.number;
-        var out = await bq_lumo_topn(param_n);
-        agent.add(out);
+        agent.add('Welcome to my agent! (default webhook)');
     }
 
     function googleAssistantHandler(agent) {
@@ -46,10 +27,13 @@ exports.main = (async (request, response) => {
 
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
+
+    intentMap.set('MyBQ Lumo', agent_lumo);
+    intentMap.set('MyBQ Status', agent_bqstatus);
+    intentMap.set('MyPP Sports', agent_schedule);
+
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', googleAssistantHandler);
-    intentMap.set('A-BQ Lumo', lumo);
-    intentMap.set('A-PP sports', sports);
     agent.handleRequest(intentMap);
 });
 

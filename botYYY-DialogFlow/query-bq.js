@@ -9,10 +9,10 @@ function prettify(bqrows){
     return dttxt;
 }
 
+/////////////////////////// /////////
+// Commom Function for generic use //
+/////////////////////////////////////
 
-////////////////////////////////////////////
-// handle dataset status (STATUS dataset) //
-////////////////////////////////////////////
 async function bq_status(dataset) {
     if(dataset!="MRT01" && dataset!="QR01" && dataset!="LUMO01"){
         return "no such dataset";
@@ -27,9 +27,6 @@ async function bq_status(dataset) {
 }
 
 
-////////////////////////////////////////////
-// handle top lumo results in bq (LUMO N) //
-////////////////////////////////////////////
 async function bq_lumo_topn(n) {
     const sqlQuery = `SELECT address, area, floor, size, rent
     FROM \`yyyaaannn.Explore.LUMO01\`
@@ -47,5 +44,23 @@ async function bq_lumo_topn(n) {
     return prettify(pretty_rows);
 }
 
+///////////////////////////////
+// For Dialogflow Agent only //
+///////////////////////////////
 
-module.exports = {bq_status, bq_lumo_topn};
+async function agent_lumo(agent){
+    var param_n = 9;
+    if(agent.parameters.number) param_n = agent.parameters.number;
+    agent.add(await bq_lumo_topn(param_n));
+}
+
+
+async function agent_bqstatus(agent){
+    var dtname = "QR01";
+    if(agent.parameters.dtname) dtname = agent.parameters.dtname.toUpperCase();
+    agent.add(await bq_status(dtname));
+}
+
+
+
+module.exports = {agent_bqstatus, agent_lumo};
