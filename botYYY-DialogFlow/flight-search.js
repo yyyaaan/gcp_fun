@@ -59,7 +59,8 @@ async function bq_flights(ddate, rdate, from, to, limit_n) {
 async function agent_flightbq(agent){
     var dtname = "QR01";
     var out = await bq_flights(
-        agent.parameters['departure'], agent.parameters['return'], 
+        agent.parameters['departure'].substring(0, 10), 
+        ((agent.parameters['return']) ? (agent.parameters['return'].substring(0, 10)) : null),
         agent.parameters['from'], agent.parameters['to'], 20
     );
     agent.add(out);

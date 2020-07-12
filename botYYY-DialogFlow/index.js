@@ -18,9 +18,8 @@ exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
     const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
     const line_userId = new String(request.body.originalDetectIntentRequest.payload.data.source.userId);
-    // console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
-    // console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
-    console.log(request.body);
+    console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
+    console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
 
     // hooks for different intentions
@@ -41,7 +40,7 @@ exports.main = (async (request, response) => {
             ext_url = ext_url + "&date=" + agent.parameters.date.substring(0, 10)
         }
         https.get(ext_url, res => {console.log('fired external:' + ext_url)});
-        intentional_sleep(9999); // timeout to recycle replyToken
+        await intentional_sleep(9999); // timeout to recycle replyToken
         agent.add('we are preparing your schedule... ~30 seconds');
     }
 
