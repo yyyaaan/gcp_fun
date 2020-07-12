@@ -47,9 +47,14 @@ async function bq_flights(ddate, rdate, from, to, limit_n) {
 
     const [rows] = await bigquery.query({query: query});
     console.log(`Fetched ${rows.length} rows from BigQuery`);
-    return rows.join('\n');
-}
 
+    var output = rows.map((x) => (
+        x.route + ' (' + x.ddate.substring(0, 2) + '-' + x.rdate + ')\n  ' +  
+        Math.ceil(x.total) + '\u20AC ' + x.detail
+    ));
+
+    return output.join('\n');
+}
 
 
 ///////////////////////////////
@@ -65,7 +70,5 @@ async function agent_flightbq(agent){
     );
     agent.add(out);
 }
-
-
 
 module.exports = {agent_flightbq};
