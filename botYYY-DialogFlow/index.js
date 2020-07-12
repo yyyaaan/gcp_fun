@@ -4,9 +4,15 @@
 
 const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogflow-fulfillment');
 const {agent_bqstatus, agent_lumo} = require('./query-bq.js');
+const {agent_flightbq} = require('./flight-search.js');
 const https = require("https");
 const testflag = "&test=yes"; // set non-BotYYY when call other function
 
+function intentional_sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+} 
 
 exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
@@ -18,7 +24,7 @@ exports.main = (async (request, response) => {
 
 
     // hooks for different intentions
-    function googleAssistantHandler(agent) {
+    function googleAssistantHandler(agent) { // not in use
         // https://developers.google.com/assistant/conversational/df-asdk/reference/nodejsv2/overview
         let conv = agent.conv(); // Get Actions on Google library conv instance
         agent.add('default fall back - google assistant');
@@ -29,11 +35,13 @@ exports.main = (async (request, response) => {
     async function agent_schedule(agent){
         // call external with replyToken and possible date
         var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games" +
-                      "?userId=" + line_userId + testflag;
+                      "?replyToken=" + line_replyToken + testflag; 
+                    //   "?userId=" + line_userId + testflag;
         if(agent.parameters.date) {
             ext_url = ext_url + "&date=" + agent.parameters.date.substring(0, 10)
         }
         https.get(ext_url, res => {console.log('fired external:' + ext_url)});
+        intentional_sleep(9999); // timeout to recycle replyToken
         agent.add('we are preparing your schedule... ~30 seconds');
     }
 
@@ -43,7 +51,8 @@ exports.main = (async (request, response) => {
     intentMap.set('MyBQ Lumo', agent_lumo);
     intentMap.set('MyBQ Status', agent_bqstatus);
     intentMap.set('MyPP Sports', agent_schedule);
-    intentMap.set('Default Fallback Intent', googleAssistantHandler);
+    intentMap.set('flight.search', agent_flightbq);
+    intentMap.set('Default Fallback Intent', googleAssistantHandler); // not in action
     agent.handleRequest(intentMap);
 });
 

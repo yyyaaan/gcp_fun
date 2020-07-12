@@ -49,3 +49,7 @@ git push -u origin master
 du -h --max-depth=1 /path/to/directory
 rm -rv ~/.local/share/Trash/*
 ```
+
+Reference for [Fire-and-Go https request](http://yurigor.com/how-to-make-http-request-from-node-js-without-waiting-for-response/)
+
+Update for unauthenticated invoke `gcloud functions add-iam-policy-binding xxx --member="allUsers" --role="roles/cloudfunctions.invoker" --region=europe-west1`
