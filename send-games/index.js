@@ -125,19 +125,22 @@ exports.main = (async (req, res) => {
 
     // changing requested date
     var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
+    var alt_txt = 'Matches of the day';
     if(req.query.days){
         var d = new Date();
         d.setDate(d.getDate() + parseInt(req.query.days));
         req_url = req_url + d.toISOString().substring(0, 10);
+        alt_txt = 'Schedule for ' + d.toISOString().substring(5, 10);
     } else if(req.query.date){
-        req_rul = req_url + req.query.date.substring(0, 10)
+        req_rul = req_url + req.query.date.substring(0, 10);
+        alt_txt = 'Schedule for ' + req.query.date.substring(5, 10);
     } 
 
-    // fetch from bbc sports
+    // fetch from bbc sports, build rich message
     var all_data = await fetch_webpage(req_url);
     var richMessage = {
         type: "flex", 
-        altText: "Your requested schedule", 
+        altText: alt_txt, 
         contents: line_carousel(all_data)
     };
 
@@ -154,7 +157,7 @@ exports.main = (async (req, res) => {
         lineClient
             .replyMessage(req.query.replyToken, richMessage)
             .catch((err) => { console.log(err.toString()) });
-        console.log("sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
+        console.log("Sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
     }
 
     // Scenario 3: push message, this has to be use due to DialogFlow limitation (push is payable)
@@ -165,7 +168,7 @@ exports.main = (async (req, res) => {
         console.log("Pushing to " + req.query.userId + ' with ' + JSON.stringify(richMessage));
     }
 
-    res.status(200).send('request recieved');
+    res.status(200).send('request served');
 });
 
 

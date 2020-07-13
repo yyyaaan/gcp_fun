@@ -15,6 +15,7 @@ async function fetch_webpage(){
     await page.setUserAgent('Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148');
     await page.setExtraHTTPHeaders({'Accept-Language': 'en'});
     await page.setRequestInterception(true);
+    await page.setJavaScriptEnabled(false);
     page.on('request', (request) => {
         if (['image', 'stylesheet', 'font', 'script'].indexOf(request.resourceType()) !== -1) {
             request.abort();
