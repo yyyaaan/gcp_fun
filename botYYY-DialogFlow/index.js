@@ -40,8 +40,7 @@ exports.main = (async (request, response) => {
             ext_url = ext_url + "&date=" + agent.parameters.date.substring(0, 10)
         }
         https.get(ext_url, res => {console.log('fired external:' + ext_url)});
-        response.status(200).send('terminated (request forwarded)');
-        await intentional_sleep(5000); // timeout to recycle replyToken
+        await intentional_sleep(6000); // timeout to recycle replyToken
         agent.add('we are preparing your schedule... ~30 seconds');
     }
 

@@ -5,7 +5,7 @@ async function bq_flights(ddate, rdate, from, to, limit_n) {
 
     // all options are optional except for:
     if((!ddate)) return 'Departure date must be specified';
-    console.log([ddate, rdate, from, to]);
+    console.log(JSON.stringify({ddate: ddate, rdate: rdate, from: from, to:to}));
 
     // build where-conditions (from to only needed in A -- due to inner join)
     var where_a = "", where_b = "", where_c = "";
