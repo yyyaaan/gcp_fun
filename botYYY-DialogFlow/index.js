@@ -16,30 +16,33 @@ function intentional_sleep(ms) {
 
 exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
-    const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
-    const line_userId = new String(request.body.originalDetectIntentRequest.payload.data.source.userId);
+    if(request.body['originalDetectIntentRequest']){
+        const isLine = (request.body.originalDetectIntentRequest.source === 'line');
+    } 
+    if(isLine){
+        const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
+        const line_userId = new String(request.body.originalDetectIntentRequest.payload.data.source.userId);
+    }
     // console.log(JSON.stringify(request.headers));
     console.log(JSON.stringify(request.body));
 
 
     // hooks for different intentions
     function googleAssistantHandler(agent) { // not in use
-        // https://developers.google.com/assistant/conversational/df-asdk/reference/nodejsv2/overview
-        let conv = agent.conv(); // Get Actions on Google library conv instance
+        let conv = agent.conv(); 
         agent.add('default fall back - google assistant');
-        conv.ask('Hello from the Actions on Google client library!'); // Use Actions on Google library
-        agent.add(conv); // Add Actions on Google library responses to your agent's response
+        conv.ask('Hello from the Actions on Google client library!');
+        agent.add(conv); 
     }
 
     async function agent_schedule(agent){
         // call external with replyToken and possible date
-        var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games" +
-                      "?replyToken=" + line_replyToken + testflag; 
-                    //   "?userId=" + line_userId + testflag;
-        if(agent.parameters.date) {
-            ext_url = ext_url + "&date=" + agent.parameters.date.substring(0, 10)
+        if(isLine){
+            var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games" +
+                        "?replyToken=" + line_replyToken + testflag; //"?userId=" + line_userId
+            if(agent.parameters.date) ext_url += "&date=" + agent.parameters.date.substring(0, 10);
+            https.get(ext_url, res => {console.log('fired external:' + ext_url)});
         }
-        https.get(ext_url, res => {console.log('fired external:' + ext_url)});
         await intentional_sleep(6000); // timeout to recycle replyToken
         agent.add('we are preparing your schedule... ~30 seconds');
     }
