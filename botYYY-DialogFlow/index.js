@@ -18,8 +18,8 @@ exports.main = (async (request, response) => {
     const agent = new WebhookClient({ request, response });
     const line_replyToken = new String(request.body.originalDetectIntentRequest.payload.data.replyToken);
     const line_userId = new String(request.body.originalDetectIntentRequest.payload.data.source.userId);
-    console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
-    console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+    // console.log(JSON.stringify(request.headers));
+    console.log(JSON.stringify(request.body));
 
 
     // hooks for different intentions
