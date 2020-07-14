@@ -8,20 +8,19 @@ const https = require("https");
 const testflag = "&test=yes"; // set non-BotYYY when call other function
 var isLine = false; 
 
-
 function intentional_sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-} 
+}
 
 exports.main = (async (request, response) => {
+    const agent = new WebhookClient({ request, response });
     console.log(JSON.stringify({body: request.body, headers: request.headers}));
     if(request.body.originalDetectIntentRequest){
         isLine = (request.body.originalDetectIntentRequest.source === 'line');
         console.log('Source LINE detected');
     } 
-    const agent = new WebhookClient({ request, response });
 
     // hooks for different intentions
     function googleAssistantHandler(agent) { // not in use
@@ -38,8 +37,9 @@ exports.main = (async (request, response) => {
             // const line_userId = request.body.originalDetectIntentRequest.payload.data.source.userId;
             var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games" +
                         "?replyToken=" + line_replyToken + testflag; //"?userId=" + line_userId
+
             if(agent.parameters.date) ext_url += "&date=" + agent.parameters.date.substring(0, 10);
-            https.get(ext_url, res => {console.log('fired external:' + ext_url)});
+            https.get(ext_url, res => {console.log('helper function done:' + ext_url)});
         }
         await intentional_sleep(6000); // timeout to recycle replyToken
         agent.add('we are preparing your schedule... ~30 seconds');
