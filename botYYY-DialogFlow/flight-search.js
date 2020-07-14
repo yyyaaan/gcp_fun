@@ -38,7 +38,7 @@ async function bq_flights(ddate, rdate, from, to, limit_n) {
     query = `
         select a.route, outbound, inbound, 
                FORMAT_DATE("%d%b", ddate) as ddate, FORMAT_DATE("%d%b", rdate) as rdate, 
-               concat("(" , ceiling(eur1), "+", ceiling(eur2), ")[", FORMAT_DATE("%d%b",  a.tss) , "]") as detail, 
+               concat("(" , ceiling(eur1), "+", ceiling(eur2), ") [", FORMAT_DATE("%d%b",  a.tss) , "]") as detail, 
                eur1 + eur2 as total 
         from (${query_a}) a inner join (${query_b}) b
         on a.route = b.route and a.tss = b.tss ${where_c}
@@ -48,10 +48,14 @@ async function bq_flights(ddate, rdate, from, to, limit_n) {
     const [rows] = await bigquery.query({query: query});
     console.log(`Fetched ${rows.length} rows from BigQuery`);
 
-    var output = rows.map((x) => (
-        x.route + ' (' + x.ddate.substring(0, 2) + '-' + x.rdate + ')\n  ' +  
-        Math.ceil(x.total) + '\u20AC ' + x.detail
-    ));
+    if(rows.length > 0){
+        var output = rows.map((x) => (
+            x.route + ' (' + x.ddate.substring(0, 2) + '-' + x.rdate + ')\n   ' +  
+            Math.ceil(x.total) + '\u20AC ' + x.detail
+        ));
+    } else {
+        var output = ["No results found", "Please try a different date/origin/destination"];
+    }
 
     return output.join('\n');
 }

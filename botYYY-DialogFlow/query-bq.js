@@ -51,7 +51,7 @@ async function bq_lumo_topn(n) {
 async function agent_lumo(agent){
     var param_n = 9;
     if(agent.parameters.number) param_n = agent.parameters.number;
-    console.log(JSON.stringify(agent));
+    console.log(JSON.stringify(agent.parameters));
     agent.add(await bq_lumo_topn(param_n));
 }
 
@@ -59,7 +59,7 @@ async function agent_lumo(agent){
 async function agent_bqstatus(agent){
     var dtname = "QR01";
     if(agent.parameters['bigqurey-dtname']) dtname = agent.parameters['bigqurey-dtname'].toUpperCase();
-    console.log(JSON.stringify(agent));
+    console.log(JSON.stringify(agent.parameters));
     agent.add(await bq_status(dtname));
 }
 

@@ -4,6 +4,18 @@ const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
 const max_bubbles = 8;
 var lineClient;
+var alt_txt = 'Matches of the day';
+const standings = [
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Premier League", uri: "https://www.bbc.com/sport/football/premier-league/table"}},
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "La Liga", uri: "https://www.bbc.com/sport/football/spanish-la-liga/table"}},
+    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Bundesliga", uri: "https://www.bbc.com/sport/football/german-bundesliga/table"}},
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Serie A", uri: "https://www.bbc.com/sport/football/italian-serie-a/table"}},
+    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Ligue 1", uri: "https://www.bbc.com/sport/football/french-ligue-one/table"}},
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Veikkauliiga", uri: "https://www.bbc.com/sport/football/finnish-veikkausliiga/table"}},
+    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Champions League", uri: "https://www.bbc.com/sport/football/champions-league/table"}}
+    {type: "separator"},
+    {type: "text", text: "Showing " + alt_txt, size: 'xxs', align: 'end'}
+];
 
 
 function getRandomColor() {
@@ -59,6 +71,33 @@ function line_carousel(all_data){
             }
         })
     }
+
+    // add a score-standing card
+    bubble_array.push({
+        "type":"bubble",
+        "size":"kilo",
+        "header":{
+            "type":"box",
+            "layout":"vertical",
+            "contents":[{
+                "type":"text",
+                "text": "Standings",
+                "color":"#ffffff",
+                "align":"start",
+                "size":"md",
+                "gravity":"center"
+            }],
+            "backgroundColor": getRandomColor(),
+        },
+        "body":{
+            "type":"box",
+            "layout":"vertical",
+            "contents": standings,
+            "spacing":"md",
+            "paddingAll":"12px"
+        }
+    });
+
     return {type: 'carousel', contents: bubble_array};
 }
 
@@ -125,7 +164,6 @@ exports.main = (async (req, res) => {
 
     // changing requested date
     var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
-    var alt_txt = 'Matches of the day';
     if(req.query.days){
         var d = new Date();
         d.setDate(d.getDate() + parseInt(req.query.days));
@@ -175,16 +213,13 @@ exports.main = (async (req, res) => {
 var req = {query:{
     days: '0', 
     broadcast: 'yes',
-    test: 'yes'
-
-    // destination: 'U21ddff11fc82268d8551c21b4019ee6c',
-    // replyToken: 'test',
-    }}
+    test: 'yes',
+}};
 
 exports.main(req, "b");
 
-(async()=> {
-    var out = await fetch_webpage('https://www.bbc.com/sport/football/scores-fixtures');
-    console.log(out);
-})();
+// (async()=> {
+//     var out = await fetch_webpage('https://www.bbc.com/sport/football/scores-fixtures');
+//     console.log(out);
+// })();
 
