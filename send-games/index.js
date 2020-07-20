@@ -13,8 +13,7 @@ const standings = [
     // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Ligue 1", uri: "https://www.bbc.com/sport/football/french-ligue-one/table"}},
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Veikkauliiga", uri: "https://www.bbc.com/sport/football/finnish-veikkausliiga/table"}},
     // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Champions League", uri: "https://www.bbc.com/sport/football/champions-league/table"}}
-    {type: "separator"},
-    {type: "text", text: "Showing " + alt_txt, size: 'xxs', align: 'end'}
+    {type: "separator"}
 ];
 
 
@@ -73,6 +72,7 @@ function line_carousel(all_data){
     }
 
     // add a score-standing card
+    standings.push({type: "text", text: "Showing " + alt_txt, size: 'xxs', align: 'end'});
     bubble_array.push({
         "type":"bubble",
         "size":"kilo",
@@ -170,7 +170,7 @@ exports.main = (async (req, res) => {
         req_url = req_url + d.toISOString().substring(0, 10);
         alt_txt = 'Schedule for ' + d.toISOString().substring(5, 10);
     } else if(req.query.date){
-        req_rul = req_url + req.query.date.substring(0, 10);
+        req_url = req_url + req.query.date.substring(0, 10);
         alt_txt = 'Schedule for ' + req.query.date.substring(5, 10);
     } 
 

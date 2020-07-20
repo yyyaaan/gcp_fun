@@ -5,7 +5,7 @@ const {WebhookClient, Text, Card, Image, Suggestion, Payload} = require('dialogf
 const {agent_bqstatus, agent_lumo} = require('./query-bq.js');
 const {agent_flightbq} = require('./flight-search.js');
 const https = require("https");
-const testflag = "&test=yes"; // set non-BotYYY when call other function
+const testflag = ""; // set &test=yes for non-BotYYY
 var isLine = false; 
 
 function intentional_sleep(ms) {
@@ -34,9 +34,8 @@ exports.main = (async (request, response) => {
         // call external with replyToken and possible date
         if(isLine){
             const line_replyToken = request.body.originalDetectIntentRequest.payload.data.replyToken;
-            // const line_userId = request.body.originalDetectIntentRequest.payload.data.source.userId;
             var ext_url = "https://europe-west2-yyyaaannn.cloudfunctions.net/send-games" +
-                        "?replyToken=" + line_replyToken + testflag; //"?userId=" + line_userId
+                        "?replyToken=" + line_replyToken; // + testflag
 
             if(agent.parameters.date) ext_url += "&date=" + agent.parameters.date.substring(0, 10);
             https.get(ext_url, res => {console.log('helper function done:' + ext_url)});

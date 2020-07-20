@@ -2,7 +2,7 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const line = require('@line/bot-sdk');
 const bigquery = new BigQuery(); // 
-const client = new line.Client({channelAccessToken: process.env.LINEY});
+const client = new line.Client({channelAccessToken: process.env.LINE});
 const https = require("https");
 
 
@@ -113,6 +113,6 @@ exports.main = (async (req, res) => {
 
 
 // debugging function
-(async ()=> {
-    await handle_msg_text("TOKEN", "lumo 10");
-})();
+// (async ()=> {
+//     await handle_msg_text("TOKEN", "lumo 10");
+// })();
