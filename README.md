@@ -4,6 +4,8 @@ A collection of multiple Google Cloud Functions. Currently implemented:
 - __bq-lumo__ (GET maxn [Link](https://europe-west1-yyyaaannn.cloudfunctions.net/bq-lumo?max_n=1)) _Submitted to Cloud Scheduler_
 - __send-games__ broadcasting require GET days;
 
+To optimize for scheduled tasks, all scraping (fetch 'n send) subprojects are moved to a single one. Individual tasks are programed in separate .js or .py file.
+
 All GET parameters are optional.
 
 # Messaging API Comsuption
