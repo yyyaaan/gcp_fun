@@ -13,4 +13,4 @@ exports.main = (async(request, response) => {
     if(schedule_lumo.includes(cur_hour)) send_lumo(false);
     if(schedule_hermes.includes(cur_hour)) send_hermes();
     if(schedule_skysports.includes(cur_hour)) send_skysports();
-}
+});
