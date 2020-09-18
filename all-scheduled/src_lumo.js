@@ -49,7 +49,7 @@ async function fetch_webpage(maxn){
     await page.waitForSelector('select.mod-searchResults__sortSelect');
     await page.select('select.mod-searchResults__sortSelect', 'MostExpensive');
     for(i = 0; i  < maxn; i++){
-        await page.waitFor(399);
+        await page.waitForTimeout(399);
         await page.waitForSelector('button.button--show-more');
         await page.click('button.button--show-more');  
     }
@@ -106,7 +106,7 @@ async function bq_lumo_rawn(n) {
     return rows;
 }
 
-async function send_lumo(){
+async function send_lumo(notifyYcloud){
     var maxn = 9;
 	
     // fetch lumo webpages + formatted msg
@@ -128,9 +128,11 @@ async function send_lumo(){
         delete all_data[i].href;
     }
     await insert_to_bigquery(all_data);
-    info_msg = `Total rows ${all_data.length} (pushed ${new_ones.length})\n` +
-                prettify(all_data.slice(0,9));
-    client.broadcast({ type: 'text', text: info_msg}); 
+    if(notifyYcloud){
+        info_msg = `Total rows ${all_data.length} (pushed ${new_ones.length})\n` +
+                    prettify(all_data.slice(0,9));
+        client.broadcast({ type: 'text', text: info_msg}); 
+    }
 }
 
 module.exports = {send_lumo};
