@@ -2,7 +2,7 @@
   "name": "all-scheduled",
   "version": "0.0.1",
   "dependencies": {
-    "puppeteer": "^5.0.0",
+    "puppeteer": "^2.1.0",
     "@google-cloud/bigquery": "^4.0.0",
     "@google-cloud/storage": "^4.0.0",
     "@line/bot-sdk": "^7.0.0"
