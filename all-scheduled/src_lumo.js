@@ -49,7 +49,7 @@ async function fetch_webpage(maxn){
     await page.waitForSelector('select.mod-searchResults__sortSelect');
     await page.select('select.mod-searchResults__sortSelect', 'MostExpensive');
     for(i = 0; i  < maxn; i++){
-        await page.waitForTimeout(399);
+        await page.waitFor(399);
         await page.waitForSelector('button.button--show-more');
         await page.click('button.button--show-more');  
     }
