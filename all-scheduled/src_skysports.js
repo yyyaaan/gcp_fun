@@ -189,7 +189,7 @@ async function all_skysports(req, res) {
         lineClient
             .broadcast(richMessage)
             .catch((err) => { console.log(err.toString()) });
-        console.log("Broadcasting " + JSON.stringify(richMessage));
+        console.log("BBCSports: Broadcasting " + JSON.stringify(richMessage));
     }
 
     // Scenario 2: reply to user, need to determine client by destination
@@ -197,7 +197,7 @@ async function all_skysports(req, res) {
         lineClient
             .replyMessage(req.query.replyToken, richMessage)
             .catch((err) => { console.log(err.toString()) });
-        console.log("Sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
+        console.log("BBCSports: Sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
     }
 
     // Scenario 3: push message, this has to be use due to DialogFlow limitation (push is payable)
@@ -205,7 +205,7 @@ async function all_skysports(req, res) {
         lineClient
             .pushMessage(req.query.userId, richMessage)
             .catch((err) => { console.log(err.toString()) });
-        console.log("Pushing to " + req.query.userId + ' with ' + JSON.stringify(richMessage));
+        console.log("BBCSports: Pushing to " + req.query.userId + ' with ' + JSON.stringify(richMessage));
     }
 
     //res.status(200).send('request served');

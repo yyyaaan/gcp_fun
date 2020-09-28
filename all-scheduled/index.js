@@ -4,10 +4,10 @@ const {send_lumo} = require('./src_lumo.js');
 const {send_skysports} = require('./src_skysports.js');
 
 // set proper schedule in UTC time zone
-const cur_hour = (new Date(Date.now())).getUTCHours();
-const schedule_lumo = [6,11,15];
-const schedule_hermes = [18];
-const schedule_skysports = [7];
+var schedule_lumo = [6,11,15];
+var schedule_hermes = [18];
+var schedule_skysports = [7];
+var cur_hour = (new Date(Date.now())).getUTCHours();
 
 exports.main = (async(req, res) => {
     var info = `UTC${cur_hour}hr`;
@@ -21,7 +21,7 @@ exports.main = (async(req, res) => {
     }
     if(schedule_skysports.includes(cur_hour)){
         await send_skysports();
-        info += ' SKYSPORTS';
+        info += ' BBCSPORTS';
     } 
 
     console.log(info);

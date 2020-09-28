@@ -88,7 +88,7 @@ async function fetch_webpage(maxn){
     });
 
     await browser.close();
-    console.log(`LUMO: fetched ${all_data.length} rows`);
+    console.log(`LUMO: fetched ${all_data.length} rows from webpage`);
 	
 	return all_data;
 }
@@ -102,7 +102,7 @@ async function bq_lumo_rawn(n) {
     limit ${n}`;
 
     const [rows] = await bigquery.query({query: sqlQuery});
-    console.log(`Fetched ${rows.length} rows from BigQuery`);
+    console.log(`LUMO: read ${rows.length} rows from BigQuery`);
     return rows;
 }
 
@@ -120,7 +120,7 @@ async function send_lumo(notifyYcloud){
         msg_text = "Newly listed among top 15:\n" + prettify(new_ones);
         // clientY.pushMessage('U791544f1b5f204dde1a7f7fa2fa4486c', {type: 'text', text: msg_text});
         clientY.broadcast({type: 'text', text: msg_text});
-        console.log(`Push ${new_ones.length} new: ` + msg_text);
+        console.log(`LUMO: Push ${new_ones.length} new`);
     }
 
     // bigquery data, drop href field; notify YanCloud
