@@ -7,10 +7,11 @@ const {send_bbcsports} = require('./src_bbcsports.js');
 var schedule_lumo = [6,11,15];
 var schedule_hermes = [18];
 var schedule_bbcsports = [7];
-cur_hour = (new Date(Date.now())).getUTCHours();
+var cur_hour = (new Date(Date.now())).getUTCHours();
+var cur_tzh  = (new Date(Date.now())).getHours();
 
 exports.main = (async(req, res) => {
-    var info = `UTC${cur_hour}hr`;
+    var info = `UTC${cur_hour}hr SYS${cur_tzh}hr (${Date.now()})`;
     if(schedule_lumo.includes(cur_hour)){
         await send_lumo(false);
         info += ' LUMO';
