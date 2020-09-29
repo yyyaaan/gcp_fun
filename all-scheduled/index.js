@@ -11,7 +11,7 @@ var cur_utc = (new Date(Date.now())).getUTCHours();
 var cur_tzh  = (new Date(Date.now())).getHours();
 var tref = 1601164800000;
 var tunit= 3600 * 1000;
-var cur_hour = Math.floor((Date.now() - t929) % (24 * tunit) / tunit);
+var cur_hour = Math.floor((Date.now() - tref) % (24 * tunit) / tunit);
 
 exports.main = (async(req, res) => {
     var info = `UTC${cur_utc}hr SYS${cur_tzh}hr CAL${cur_hour}hr`;
