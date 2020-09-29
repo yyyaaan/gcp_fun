@@ -1,20 +1,19 @@
 // load individual function modules
+const {getHourAPI} = require('./src_timeapi.js');
 const {send_hermes} = require('./src_hermes.js');
 const {send_lumo} = require('./src_lumo.js');
 const {send_bbcsports} = require('./src_bbcsports.js');
 
-// set proper schedule in UTC time zone
-var schedule_lumo = [6,11,15];
-var schedule_hermes = [18];
-var schedule_bbcsports = [7];
-var cur_utc = (new Date(Date.now())).getUTCHours();
-var cur_tzh  = (new Date(Date.now())).getHours();
-var tref = 1601164800000;
-var tunit= 3600 * 1000;
-var cur_hour = Math.floor((Date.now() - tref) % (24 * tunit) / tunit);
+// set proper schedule in HELSINKI time zone
+let schedule_lumo = [6,11,15];
+let schedule_hermes = [18];
+let schedule_bbcsports = [7];
 
 exports.main = (async(req, res) => {
-    var info = `UTC${cur_utc}hr SYS${cur_tzh}hr CAL${cur_hour}hr`;
+    // get correct time from API
+    let cur_hour = await getHourAPI();
+    let info = `Time${cur_hour}hr`;
+
     if(schedule_lumo.includes(cur_hour)){
         await send_lumo(false);
         info += ' LUMO';
