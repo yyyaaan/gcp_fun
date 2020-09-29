@@ -4,6 +4,6 @@
     "@google-cloud/bigquery": "^4.0.0",
     "@google-cloud/storage": "^4.0.0",
     "@line/bot-sdk": "^7.0.0",
-    "axios": "^0.16.0"
+    "axios": "^0.18.1"
   }
 }
