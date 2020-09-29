@@ -156,7 +156,7 @@ async function fetch_webpage(req_url){
 
 
 // this is all fulfillment function
-async function all_skysports(req, res) {
+async function all_bbcsports(req, res) {
 
     if(req.query.test){
         lineClient = new line.Client({channelAccessToken: process.env.LINE});
@@ -212,10 +212,10 @@ async function all_skysports(req, res) {
 }
 
 // export submodule
-async function send_skysports(){
+async function send_bbcsports(){
     var req = {query:{days: '0', broadcast: 'yes' }};
 
-    await all_skysports(req, ".");
+    await all_bbcsports(req, ".");
 }
 
-module.exports = {send_skysports};
+module.exports = {send_bbcsports};
