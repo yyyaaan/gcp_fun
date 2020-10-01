@@ -5,9 +5,9 @@ const {send_lumo} = require('./src_lumo.js');
 const {send_bbcsports} = require('./src_bbcsports.js');
 
 // set proper schedule in HELSINKI time zone
-let schedule_lumo = [6,11,15];
-let schedule_hermes = [18];
-let schedule_bbcsports = [7];
+let schedule_lumo = [9,14,18];
+let schedule_hermes = [20];
+let schedule_bbcsports = [10];
 
 exports.main = (async(req, res) => {
     // get correct time from API
