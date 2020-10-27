@@ -9,13 +9,14 @@ var alt_txt = 'Matches of the day';
 const standings = [
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Premier League", uri: "https://www.bbc.com/sport/football/premier-league/table"}},
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "La Liga", uri: "https://www.bbc.com/sport/football/spanish-la-liga/table"}},
-    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Bundesliga", uri: "https://www.bbc.com/sport/football/german-bundesliga/table"}},
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Bundesliga", uri: "https://www.bbc.com/sport/football/german-bundesliga/table"}},
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Serie A", uri: "https://www.bbc.com/sport/football/italian-serie-a/table"}},
-    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Ligue 1", uri: "https://www.bbc.com/sport/football/french-ligue-one/table"}},
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Ligue 1", uri: "https://www.bbc.com/sport/football/french-ligue-one/table"}},
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Veikkauliiga", uri: "https://www.bbc.com/sport/football/finnish-veikkausliiga/table"}},
-    // {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Champions League", uri: "https://www.bbc.com/sport/football/champions-league/table"}}
+    {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Champions League", uri: "https://www.bbc.com/sport/football/champions-league/table"}},
     {type: "separator"}
 ];
+
 
 
 function getRandomColor() {
@@ -129,11 +130,15 @@ async function fetch_webpage(req_url){
         var all_data = [];
         var all_fas = document.querySelectorAll('div.qa-match-block');
         var regex1 = /\d{1,2}:\d{2}/;
+        var regex_excl = /league one|league two|national league|lowland/i;
 
         for (var i = 0; i < all_fas.length; i++){
             var cur_data = [];
             var faname = all_fas[i].querySelector('h3').innerText.trim();
             var games = all_fas[i].querySelectorAll('li');
+            
+            if(regex_excl.test(faname)) continue;
+
             if(games){
                 for(var j = 0; j < games.length; j++){
                     cur_data.push({
@@ -145,7 +150,7 @@ async function fetch_webpage(req_url){
                     })
                 }
             }
-            all_data[i] = cur_data;
+            all_data.push(cur_data);
         }
         return all_data;
     });
@@ -213,9 +218,9 @@ async function all_bbcsports(req, res) {
 
 // export submodule
 async function send_bbcsports(){
-    var req = {query:{days: '0', broadcast: 'yes' }};
 
-    await all_bbcsports(req, ".");
+    await all_bbcsports({query:{days: '0', broadcast: 'yes'}}, ".");
+    //await all_bbcsports({query:{days: '0', broadcast: 'yes', test: 'yes' }}, ".");
 }
 
 module.exports = {send_bbcsports};
