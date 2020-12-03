@@ -24,7 +24,7 @@ function prettify(bqrows){
 // handle dataset status (STATUS dataset) //
 ////////////////////////////////////////////
 async function bq_status(dataset) {
-    if(["MRT01", "AY01", "HLT01", "ALL01", "QR01", "LUMO01"].indexOf(dataset) > -1){
+    if(["MRT01", "AY01", "HLT01", "ACR01", "QR01", "LUMO01"].indexOf(dataset) < 0){
         return "no such dataset";
     }
     const sqlQuery = `SELECT tss, count(*) as n
