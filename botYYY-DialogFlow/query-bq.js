@@ -1,7 +1,7 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery = new BigQuery(); // 
 const max_bubbles = 8;
-// env: BQTBLS=MRT01_QR01_LUMO01_AY01_HLT01_ACR01
+// env BQTBLS=MRT01_QR01_LUMO01_AY01_HLT01_ACR01
 
 function prettify(bqrows){
     const regex = /[\[\{\}\]"]|(tss..)|(value..)|(apt..)/g;

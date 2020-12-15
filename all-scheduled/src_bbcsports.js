@@ -130,7 +130,7 @@ async function fetch_webpage(req_url){
         var all_data = [];
         var all_fas = document.querySelectorAll('div.qa-match-block');
         var regex1 = /\d{1,2}:\d{2}/;
-        var regex_excl = /league one|league two|national league|lowland/i;
+        var regex_excl = /league one|league two|national league|fa trophy|efl trophy|scottish cup|lowland/i;
 
         for (var i = 0; i < all_fas.length; i++){
             var cur_data = [];
