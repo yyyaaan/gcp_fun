@@ -4,9 +4,9 @@ const {send_hermes} = require('./src_hermes.js');
 const {send_lumo} = require('./src_lumo.js');
 const {send_bbcsports} = require('./src_bbcsports.js');
 
-// set proper schedule in HELSINKI time zone
+// set proper schedule in HELSINKI time zone (999 to skip)
 let schedule_lumo = [9,14,18];
-let schedule_hermes = [20];
+let schedule_hermes = [999];
 let schedule_bbcsports = [10];
 
 exports.main = (async(req, res) => {
