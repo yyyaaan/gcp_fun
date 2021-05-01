@@ -55,10 +55,10 @@ const {the_fun} = require('./exportimport.js');
 
 ```
 git clone https://github.com/yyyaaan/gcp_fun
-git pull origin master
+git pull origin main
 git add .
 git commit -m ""
-git push -u origin master
+git push -u origin main
 ```
 
 ```
