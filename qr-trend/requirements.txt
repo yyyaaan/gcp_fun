@@ -1,5 +1,5 @@
-google-cloud-bigquery==1.25.0
-plotly==4.4.1
-Flask==1.1.2
-pandas==1.0.5
+google-cloud-bigquery>=1.25.0
+plotly>=4.14.3
+Flask>=1.1.2
+pandas>=1.0.5
 pyarrow>=0.14
