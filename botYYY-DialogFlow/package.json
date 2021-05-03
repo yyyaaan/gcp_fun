@@ -1,12 +1,12 @@
 {
     "version": "0.0.1",
     "dependencies": {
-        "https": "1",
         "@google-cloud/bigquery": "^5.0.0",
         "@google-cloud/storage": "^5.0.0",
-        "actions-on-google": "^2.2.0",
-        "dialogflow": "^1.0.0",
-        "dialogflow-fulfillment": "^0.6.1"
+        "actions-on-google": "^1.2.1",
+        "dialogflow": "^4.0.3",
+        "dialogflow-fulfillment": "^0.6.1",
+        "https": "1"
     },
     "comments": {
         "firebase-admin": "^5.13.1",
