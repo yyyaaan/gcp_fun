@@ -9,7 +9,7 @@ const { send_hokelanto } = require('./src_hokelanto.js');
 let schedule_lumo = [9,14,18];
 let schedule_hermes = [999];
 let schedule_bbcsports = [10];
-let schedule_hokelanto = [15];
+let schedule_hokelanto = [11];
 
 exports.main = (async(req, res) => {
     // get correct time from API
