@@ -1,8 +1,7 @@
 const puppeteer = require('puppeteer');
-const line = require('@line/bot-sdk');
-const lineClient = new line.Client({channelAccessToken: process.env.LINEY});
+const axios = require('axios');
 const req_url = "https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/";
-
+const audienceList = ["+358 44 9199857", "+358 41 3695423"]
 
 async function fetch_webpage(){
     // start browser and block pictures
@@ -39,7 +38,6 @@ async function fetch_webpage(){
 
     await browser.close();
 
-
     // keep only text with "bounus tuplana"
     var outcome = "";
     for (var i = 0; i < all_data.length; i++){
@@ -60,30 +58,48 @@ async function fetch_webpage(){
 
 async function send_hokelanto(){
 
-    var bonusx2 = await fetch_webpage();
+    var bonusX2 = await fetch_webpage();
 
-    if (bonusx2.length < 10){
+    if (bonusX2.length < 10){
         console.log("Bonus tuplana not available");
-        return "nothing";
-
+        bonusX2 = "Bonus tuplana N/A";
+        if(process.env.VERBOSE != 'YES') {
+            return "nothing";
+        }
     }
 
-    var textMessage = {type: "text", text: bonusx2};
-
-    lineClient
-        .broadcast(textMessage)
-        .catch((err) => { console.log(err.toString()) });
-
-    console.log("Broadcasting " + JSON.stringify(textMessage));
+    for (let audience of audienceList) {
+        const postData = {
+            messaging_product: "whatsapp", 
+            recipient_type: "individual",
+            to: audience, 
+            type: "text", 
+            text: { body: bonusX2 }
+        }
+    
+        axios.post('https://graph.facebook.com/v18.0/217957681407032/messages', postData, {
+            headers: {
+                'Authorization': `Bearer ${process.env.whatsappTest}`,
+            }
+        })
+            .then((response) => {
+                console.log('Status:', response.status, response.data);
+            })
+            .catch((error) => {
+                console.error('Error:', error.message);
+            });
+    
+    }
 }
 
-module.exports = {send_hokelanto};
+module.exports = { send_hokelanto };
 
 
 
 // async function main(){
-//     var all_data = await fetch_webpage();
-//     console.log(all_data)
+//     // var all_data = await fetch_webpage();
+//     // console.log(all_data)
+//     await send_hokelanto();
 // }
 
 // main()

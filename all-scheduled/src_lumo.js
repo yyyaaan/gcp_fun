@@ -1,10 +1,9 @@
 const puppeteer = require('puppeteer');
 const {BigQuery} = require('@google-cloud/bigquery');
-const line = require('@line/bot-sdk');
-const client = new line.Client({channelAccessToken: process.env.LINE});
-const clientY = new line.Client({channelAccessToken: process.env.LINEY});
+const axios = require('axios');
 const bigquery = new BigQuery(); 
 const req_url = 'https://lumo.fi/vuokra-asunnot/';
+const audienceList = ["+358 44 9199857", "+358 41 3695423"]
 
 
 async function insert_to_bigquery(all_data) {
@@ -106,7 +105,7 @@ async function bq_lumo_rawn(n) {
     return rows;
 }
 
-async function send_lumo(notifyYcloud){
+async function send_lumo(){
     var maxn = 9;
 	
     // fetch lumo webpages + formatted msg
@@ -117,9 +116,31 @@ async function send_lumo(notifyYcloud){
     new10 = all_data.slice(0, 15);
     new_ones = new10.filter(x => !old20.map((element) => (element.address)).includes(x.address) );
     if(new_ones.length > 0){
-        msg_text = "Newly listed among top 15:\n" + prettify(new_ones);
-        // clientY.pushMessage('U791544f1b5f204dde1a7f7fa2fa4486c', {type: 'text', text: msg_text});
-        clientY.broadcast({type: 'text', text: msg_text});
+        
+        for (let audience of audienceList) {
+            const postData = {
+                messaging_product: "whatsapp", 
+                recipient_type: "individual",
+                to: audience, 
+                type: "text", 
+                text: { body: "Newly listed among top 15:\n" + prettify(new_ones) }
+            }
+            
+            axios.post('https://graph.facebook.com/v18.0/217957681407032/messages', postData, {
+                headers: {
+                    'Authorization': `Bearer ${process.env.whatsappTest}`,
+                }
+            })
+                .then((response) => {
+                    console.log('Status:', response.status, response.data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error.message);
+                });
+        
+        }
+
+        // clientY.broadcast({type: 'text', text: msg_text});
         console.log(`LUMO: Push ${new_ones.length} new`);
     }
 
@@ -128,12 +149,13 @@ async function send_lumo(notifyYcloud){
         delete all_data[i].href;
     }
     await insert_to_bigquery(all_data);
-    if(notifyYcloud){
-        info_msg = `Total rows ${all_data.length} (pushed ${new_ones.length})\n` +
-                    prettify(all_data.slice(0,9));
-        client.broadcast({ type: 'text', text: info_msg}); 
-    }
 }
 
 module.exports = {send_lumo};
 
+
+async function main() {
+    await send_lumo();
+}
+
+main()

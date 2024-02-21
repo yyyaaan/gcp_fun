@@ -1,3 +1,4 @@
+// PENDING UPDATE TO whatsapp
 // this file prepares all fulfillments, but only broadcasting are exported
 // (1) daily broadcast (2) reply by token and client (3) push message by userId
 

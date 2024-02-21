@@ -1,3 +1,4 @@
+// PENDING UPDATE TO whatsapp
 const puppeteer = require('puppeteer');
 const line = require('@line/bot-sdk');
 const lineClient = new line.Client({channelAccessToken: process.env.LINEY});
