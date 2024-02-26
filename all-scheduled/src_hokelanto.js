@@ -1,7 +1,9 @@
-const puppeteer = require('puppeteer');
 const axios = require('axios');
+const puppeteer = require('puppeteer');
+const sgMail = require('@sendgrid/mail')
 const req_url = "https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/";
 const audienceList = ["+358 44 9199857", "+358 41 3695423"]
+const audienceEmails = ['yan@yan.fi', 'nocturn21st@gmail.com']
 
 async function fetch_webpage(){
     // start browser and block pictures
@@ -68,6 +70,23 @@ async function send_hokelanto(){
         }
     }
 
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    sgMail
+        .send({
+            to: audienceEmails,
+            from: 'BotYYY@yan.fi',
+            subject: `BotYYY ${bonusX2}`,
+            text: bonusX2,
+            html: bonusX2,
+        })
+        .then(() => {
+            console.log('Email sent')
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+
+    // whatsapp
     for (let audience of audienceList) {
         const postData = {
             messaging_product: "whatsapp", 

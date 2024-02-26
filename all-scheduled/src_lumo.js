@@ -1,9 +1,11 @@
+const axios = require('axios');
 const puppeteer = require('puppeteer');
 const {BigQuery} = require('@google-cloud/bigquery');
-const axios = require('axios');
 const bigquery = new BigQuery(); 
+const sgMail = require('@sendgrid/mail')
 const req_url = 'https://lumo.fi/vuokra-asunnot/';
 const audienceList = ["+358 44 9199857", "+358 41 3695423"]
+const audienceEmails = ['yan@yan.fi', 'nocturn21st@gmail.com']
 
 
 async function insert_to_bigquery(all_data) {
@@ -116,7 +118,25 @@ async function send_lumo(){
     new10 = all_data.slice(0, 15);
     new_ones = new10.filter(x => !old20.map((element) => (element.address)).includes(x.address) );
     if(new_ones.length > 0){
-        
+
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+        const msg = {
+            to: audienceEmails,
+            from: 'BotYYY@yan.fi',
+            subject: 'BotYYY: Lumo newly listed top apartments',
+            text: prettify(new_ones),
+            html: prettify(new_ones),
+        }
+        sgMail
+            .send(msg)
+            .then(() => {
+                console.log('Email sent')
+            })
+            .catch((error) => {
+                console.error(error)
+            })
+
+        // whatsapp
         for (let audience of audienceList) {
             const postData = {
                 messaging_product: "whatsapp", 
