@@ -7,7 +7,7 @@ const req_url = 'https://www.hermes.com/fi/en/category/women/bags-and-small-leat
 async function fetch_webpage(){
     // start browser and block pictures
     const browser = await puppeteer.launch({
-        headless: true, 
+        headless: 'new', 
         ignoreHTTPSErrors: true,
         defaultViewport: {width: 1023, height: 1366},
         args: ['--no-sandbox', '--lang=en-US,en']

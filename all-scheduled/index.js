@@ -1,8 +1,7 @@
-// load individual function modules
 const { getHourAPI } = require('./src_timeapi.js');
 // const { send_hermes } = require('./src_hermes.js');
 const { send_lumo } = require('./src_lumo.js');
-// const { send_bbcsports } = require('./src_bbcsports.js');
+const { send_bbcsports } = require('./src_bbcsports.js');
 const { send_hokelanto } = require('./src_hokelanto.js');
 
 // set proper schedule in HELSINKI time zone (999 to skip)
@@ -29,8 +28,8 @@ exports.main = (async(req, res) => {
         info += ' HERMES not ready';
     }
     if(schedule_bbcsports.includes(cur_hour)){
-        // await send_bbcsports();
-        info += ' BBCSPORTS not ready';
+        await send_bbcsports();
+        info += ' BBCSPORTS';
     } 
 
     console.log(info);

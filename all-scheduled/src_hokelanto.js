@@ -1,14 +1,12 @@
+const { send_emails } = require('./util_send.js')
 const axios = require('axios');
 const puppeteer = require('puppeteer');
-const sgMail = require('@sendgrid/mail')
 const req_url = "https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/";
-const audienceList = ["+358 44 9199857", "+358 41 3695423"]
-const audienceEmails = ['yan@yan.fi', 'nocturn21st@gmail.com']
 
 async function fetch_webpage(){
     // start browser and block pictures
     const browser = await puppeteer.launch({
-        headless: true, 
+        headless: 'new', 
         ignoreHTTPSErrors: true,
         defaultViewport: {width: 1023, height: 1366},
         args: ['--no-sandbox', '--lang=en-US,en']
@@ -64,61 +62,25 @@ async function send_hokelanto(){
 
     if (bonusX2.length < 10){
         console.log("Bonus tuplana not available");
-        bonusX2 = "Bonus tuplana N/A";
+        bonusX2 = "No Bonus tuplana";
         if(process.env.VERBOSE != 'YES') {
             return "nothing";
         }
     }
 
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-    sgMail
-        .send({
-            to: audienceEmails,
-            from: 'BotYYY@yan.fi',
-            subject: `BotYYY ${bonusX2}`,
-            text: bonusX2,
-            html: bonusX2,
-        })
-        .then(() => {
-            console.log('Email sent')
-        })
-        .catch((error) => {
-            console.error(error)
-        })
-
-    // whatsapp
-    for (let audience of audienceList) {
-        const postData = {
-            messaging_product: "whatsapp", 
-            recipient_type: "individual",
-            to: audience, 
-            type: "text", 
-            text: { body: bonusX2 }
-        }
-    
-        axios.post('https://graph.facebook.com/v18.0/217957681407032/messages', postData, {
-            headers: {
-                'Authorization': `Bearer ${process.env.whatsappTest}`,
-            }
-        })
-            .then((response) => {
-                console.log('Status:', response.status, response.data);
-            })
-            .catch((error) => {
-                console.error('Error:', error.message);
-            });
-    
-    }
+    send_emails(
+        subject=`BotYY: Hok-Elanto ${bonusX2}`,
+        text=bonusX2,
+        html=bonusX2,
+    )
 }
 
 module.exports = { send_hokelanto };
 
 
 
-// async function main(){
-//     // var all_data = await fetch_webpage();
-//     // console.log(all_data)
-//     await send_hokelanto();
-// }
+async function main(){
+    await send_hokelanto();
+}
 
-// main()
+main()

@@ -1,12 +1,6 @@
-// PENDING UPDATE TO whatsapp
-// this file prepares all fulfillments, but only broadcasting are exported
-// (1) daily broadcast (2) reply by token and client (3) push message by userId
-
+const { send_emails } = require('./util_send.js')
 const puppeteer = require('puppeteer');
-const line = require('@line/bot-sdk');
-const max_bubbles = 8;
-var lineClient;
-var alt_txt = 'Matches of the day';
+
 const standings = [
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "Premier League", uri: "https://www.bbc.com/sport/football/premier-league/table"}},
     {type: "button", margin: "xs", height: "sm", action: {type: "uri", label: "La Liga", uri: "https://www.bbc.com/sport/football/spanish-la-liga/table"}},
@@ -29,88 +23,47 @@ function getRandomColor() {
     return color;
 }
 
-
-function line_carousel(all_data){
-    var bubble_array = [];
-    for(i = 0; i < Math.min(all_data.length, max_bubbles); i++){
-
-        nice_data = all_data[i].map((element) => ({
-            a: ((parseInt(element.time.substring(0, 2)) + 2) + 
-                element.time.substring(2, 5) +
-                element.note + ' ').replace(/NaNll|\n/g, ''),
-            b: (element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' '),
-        }));
-
-        cur_array = nice_data.map((element) => ({
-            type: "box",
-            layout: "horizontal",
-            contents: [{type: "text", size: "xs", wrap: true, weight: "bold", text: element.a},
-                       {type: "text", size: "xs", wrap: true, flex: 4, text: element.b}] 
-        }));
-
-        bubble_array.push({
-            "type":"bubble",
-            "size":"kilo",
-            "header":{
-                "type":"box",
-                "layout":"vertical",
-                "contents":[{
-                    "type":"text",
-                    "text": all_data[i][0].fa,
-                    "color":"#ffffff",
-                    "align":"start",
-                    "size":"md",
-                    "gravity":"center"
-                }],
-                "backgroundColor": getRandomColor(),
-            },
-            "body":{
-                "type":"box",
-                "layout":"vertical",
-                "contents": cur_array,
-                "spacing":"md",
-                "paddingAll":"12px"
-            }
-        })
-    }
-
-    // add a score-standing card
-    standings.push({type: "text", text: "Showing " + alt_txt, size: 'xxs', align: 'end'});
-    bubble_array.push({
-        "type":"bubble",
-        "size":"kilo",
-        "header":{
-            "type":"box",
-            "layout":"vertical",
-            "contents":[{
-                "type":"text",
-                "text": "Standings",
-                "color":"#ffffff",
-                "align":"start",
-                "size":"md",
-                "gravity":"center"
-            }],
-            "backgroundColor": getRandomColor(),
-        },
-        "body":{
-            "type":"box",
-            "layout":"vertical",
-            "contents": standings,
-            "spacing":"md",
-            "paddingAll":"12px"
-        }
-    });
-
-    return {type: 'carousel', contents: bubble_array};
+function getRandomStyle() {
+    randomColor = getRandomColor()
+    styleText = "border-style: none none none solid; border-color:";
+    styleText += randomColor + ";";
+    styleText += "color:" + randomColor + ";";
+    return styleText
 }
 
+function html_message(all_data) {
+    var html_content = '';
+    var title_text = 'Today';
+    
+    for(i = 0; i < all_data.length; i++){
+        nice_data = all_data[i].map((element) => ({
+            time: ((parseInt(element.time.substring(0, 2)) + 2) + 
+                element.time.substring(2, 5) +
+                element.note + ' ').replace(/NaNll|\n/g, ''),
+            game: (element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' '),
+        }));
 
+        time_game_list = nice_data.map((element) => `<b>${element.time}</b>  ${element.game}`);
+
+        html_content += `<h3 style="${getRandomStyle()}"> ${all_data[i][0].fa}</h3>`;
+        html_content += `<p>${time_game_list.join('<br>')}</p>`;
+
+        if (i < 2) {
+            title_text += ` ${nice_data.length} ${all_data[i][0].fa.replace("THE ", "")}` 
+        }
+    }
+
+    return {
+        title: title_text,
+        html: html_content,
+    };
+}
 
 
 async function fetch_webpage(req_url){
 	// start browser and block pictures
     const browser = await puppeteer.launch({
-        headless: true, 
+        headless: 'new', 
 		ignoreHTTPSErrors: true,
 		args: ['--no-sandbox']
     });
@@ -164,13 +117,6 @@ async function fetch_webpage(req_url){
 // this is all fulfillment function
 async function all_bbcsports(req, res) {
 
-    if(req.query.test){
-        lineClient = new line.Client({channelAccessToken: process.env.LINE});
-    } else {
-        lineClient = new line.Client({channelAccessToken: process.env.LINEY});
-    }
-
-    // changing requested date
     var req_url = 'https://www.bbc.co.uk/sport/football/scores-fixtures/';
     if(req.query.days){
         var d = new Date();
@@ -183,38 +129,14 @@ async function all_bbcsports(req, res) {
     } 
 
     // fetch from bbc sports, build rich message
-    var all_data = await fetch_webpage(req_url);
-    var richMessage = {
-        type: "flex", 
-        altText: alt_txt, 
-        contents: line_carousel(all_data)
-    };
+    const all_data = await fetch_webpage(req_url);
+    const html_data = html_message(all_data);
 
-    // Scenario 1: broadcasting, called by scheduler
-    if(req.query.broadcast){
-        lineClient
-            .broadcast(richMessage)
-            .catch((err) => { console.log(err.toString()) });
-        console.log("BBCSports: Broadcasting " + JSON.stringify(richMessage));
-    }
-
-    // Scenario 2: reply to user, need to determine client by destination
-    if(req.query.replyToken){
-        lineClient
-            .replyMessage(req.query.replyToken, richMessage)
-            .catch((err) => { console.log(err.toString()) });
-        console.log("BBCSports: Sending reply to " + req.query.replyToken + ' with ' + JSON.stringify(richMessage));
-    }
-
-    // Scenario 3: push message, this has to be use due to DialogFlow limitation (push is payable)
-    if(req.query.userId){
-        lineClient
-            .pushMessage(req.query.userId, richMessage)
-            .catch((err) => { console.log(err.toString()) });
-        console.log("BBCSports: Pushing to " + req.query.userId + ' with ' + JSON.stringify(richMessage));
-    }
-
-    //res.status(200).send('request served');
+    send_emails(
+        subject=html_data.title, 
+        text=html_data.title, 
+        html=html_data.html,
+    )
 }
 
 // export submodule
@@ -224,4 +146,7 @@ async function send_bbcsports(){
     //await all_bbcsports({query:{days: '0', broadcast: 'yes', test: 'yes' }}, ".");
 }
 
-module.exports = {send_bbcsports};
+module.exports = { send_bbcsports };
+
+
+// send_bbcsports()

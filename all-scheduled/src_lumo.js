@@ -1,11 +1,8 @@
-const axios = require('axios');
+const { send_emails } = require('./util_send.js')
 const puppeteer = require('puppeteer');
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery = new BigQuery(); 
-const sgMail = require('@sendgrid/mail')
 const req_url = 'https://lumo.fi/vuokra-asunnot/';
-const audienceList = ["+358 44 9199857", "+358 41 3695423"]
-const audienceEmails = ['yan@yan.fi', 'nocturn21st@gmail.com']
 
 
 async function insert_to_bigquery(all_data) {
@@ -33,7 +30,7 @@ function prettify(raw_data){
 async function fetch_webpage(maxn){
 	// start browser and block pictures
     const browser = await puppeteer.launch({
-        headless: true, 
+        headless: 'new', 
 		ignoreHTTPSErrors: true,
 		args: ['--no-sandbox']
     });
@@ -50,7 +47,7 @@ async function fetch_webpage(maxn){
     await page.waitForSelector('select.mod-searchResults__sortSelect');
     await page.select('select.mod-searchResults__sortSelect', 'MostExpensive');
     for(i = 0; i  < maxn; i++){
-        await page.waitFor(399);
+        await page.waitForTimeout(399);
         await page.waitForSelector('button.button--show-more');
         await page.click('button.button--show-more');  
     }
@@ -118,50 +115,11 @@ async function send_lumo(){
     new10 = all_data.slice(0, 15);
     new_ones = new10.filter(x => !old20.map((element) => (element.address)).includes(x.address) );
     if(new_ones.length > 0){
-
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-        const msg = {
-            to: audienceEmails,
-            from: 'BotYYY@yan.fi',
-            subject: 'BotYYY: Lumo newly listed top apartments',
-            text: prettify(new_ones),
-            html: prettify(new_ones),
-        }
-        sgMail
-            .send(msg)
-            .then(() => {
-                console.log('Email sent')
-            })
-            .catch((error) => {
-                console.error(error)
-            })
-
-        // whatsapp
-        for (let audience of audienceList) {
-            const postData = {
-                messaging_product: "whatsapp", 
-                recipient_type: "individual",
-                to: audience, 
-                type: "text", 
-                text: { body: "Newly listed among top 15:\n" + prettify(new_ones) }
-            }
-            
-            axios.post('https://graph.facebook.com/v18.0/217957681407032/messages', postData, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.whatsappTest}`,
-                }
-            })
-                .then((response) => {
-                    console.log('Status:', response.status, response.data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error.message);
-                });
-        
-        }
-
-        // clientY.broadcast({type: 'text', text: msg_text});
-        console.log(`LUMO: Push ${new_ones.length} new`);
+        send_emails(
+            subject=`BotYYY: ${new_ones.length} new top apartments`,
+            text=prettify(new_ones),
+            html=prettify(new_ones),
+        )
     }
 
     // bigquery data, drop href field; notify YanCloud
@@ -174,8 +132,8 @@ async function send_lumo(){
 module.exports = {send_lumo};
 
 
-async function main() {
-    await send_lumo();
-}
+// async function main() {
+//     await send_lumo();
+// }
 
-main()
+// main()
