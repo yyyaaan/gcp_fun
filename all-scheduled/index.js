@@ -8,11 +8,11 @@ const { send_hokelanto } = require('./src_hokelanto.js');
 let schedule_lumo = [9,14,18];
 let schedule_hermes = [999];
 let schedule_bbcsports = [10];
-let schedule_hokelanto = [11];
+let schedule_hokelanto = [999];
 
 exports.main = (async(req, res) => {
-    // get correct time from API
     let cur_hour = await getHourAPI();
+    cur_hour = req.body ? parseInt(req.body.hour) : cur_hour;
     let info = `Time${cur_hour}hr`;
 
     if(schedule_hokelanto.includes(cur_hour)){
@@ -29,7 +29,7 @@ exports.main = (async(req, res) => {
     }
     if(schedule_bbcsports.includes(cur_hour)){
         await send_bbcsports();
-        info += ' BBCSPORTS';
+        info += ' BBCSPORTS+HOKELANTO';
     } 
 
     console.log(info);

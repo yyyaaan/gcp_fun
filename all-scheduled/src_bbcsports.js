@@ -1,4 +1,5 @@
 const { send_emails } = require('./util_send.js')
+const { read_hok_elanto } = require('./src_hokelanto.js')
 const puppeteer = require('puppeteer');
 
 const standings = [
@@ -23,14 +24,6 @@ function getRandomColor() {
     return color;
 }
 
-function getRandomStyle() {
-    randomColor = getRandomColor()
-    styleText = "border-style: none none none solid; border-color:";
-    styleText += randomColor + ";";
-    styleText += "color:" + randomColor + ";";
-    return styleText
-}
-
 function html_message(all_data) {
     var html_content = '';
     var title_text = 'Today';
@@ -43,10 +36,20 @@ function html_message(all_data) {
             game: (element.home + ' vs. ' + element.away).replace(/NaNll|\n/g, '').replace(/\t/g, ' '),
         }));
 
-        time_game_list = nice_data.map((element) => `<b>${element.time}</b>  ${element.game}`);
+        time_game_list = nice_data.map((element) => `<span style="font-family: monospace; font-weight: bold;">${element.time}</span>  ${element.game}`);
 
-        html_content += `<h3 style="${getRandomStyle()}"> ${all_data[i][0].fa}</h3>`;
+        the_color = getRandomColor()
+        the_style =  "margin-bottom: 30px; font-family: system-ui; "
+        if (i % 2) {
+            the_style += `border-right: 9px solid ${the_color}33` + ";  padding-right: 30px; ";
+        } else {
+            the_style += `border-left: 9px solid ${the_color}33` + ";  padding-left: 30px; ";
+        }
+
+        html_content += `<div style="${the_style}">`;
+        html_content += `<h3 style="color: ${the_color}"> ${all_data[i][0].fa}</h3>`;
         html_content += `<p>${time_game_list.join('<br>')}</p>`;
+        html_content += '</div>';
 
         if (i < 2) {
             title_text += ` ${nice_data.length} ${all_data[i][0].fa.replace("THE ", "")}` 
@@ -132,6 +135,16 @@ async function all_bbcsports(req, res) {
     const all_data = await fetch_webpage(req_url);
     const html_data = html_message(all_data);
 
+    // including HOK-Elanto
+    const bonus = await read_hok_elanto();
+    const bouns_style = "font-family: system-ui; color: #999; "
+    if (bonus.length > 10) {
+        html_data.html = `<p style="${bouns_style}">HOK Elanto Bonus X2 ${bonus}</p>` + html_data.html
+        html_data.title = "BonusX2" + html_data.title;
+    } else {
+        html_data.html = html_data.html + `<p style="${bouns_style}">HOK Elanto has no offer at this moment.</p>`
+    }
+
     send_emails(
         subject=html_data.title, 
         text=html_data.title, 
@@ -139,14 +152,14 @@ async function all_bbcsports(req, res) {
     )
 }
 
-// export submodule
-async function send_bbcsports(){
-
+async function send_bbcsports() {
     await all_bbcsports({query:{days: '0', broadcast: 'yes'}}, ".");
-    //await all_bbcsports({query:{days: '0', broadcast: 'yes', test: 'yes' }}, ".");
 }
 
 module.exports = { send_bbcsports };
 
+// async function main() {
+//     await send_bbcsports();
+// }
 
-// send_bbcsports()
+// main()

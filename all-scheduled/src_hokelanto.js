@@ -1,9 +1,9 @@
+// also called in src_bbcsports
 const { send_emails } = require('./util_send.js')
-const axios = require('axios');
 const puppeteer = require('puppeteer');
 const req_url = "https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/";
 
-async function fetch_webpage(){
+async function read_hok_elanto(){
     // start browser and block pictures
     const browser = await puppeteer.launch({
         headless: 'new', 
@@ -58,7 +58,7 @@ async function fetch_webpage(){
 
 async function send_hokelanto(){
 
-    var bonusX2 = await fetch_webpage();
+    var bonusX2 = await read_hok_elanto();
 
     if (bonusX2.length < 10){
         console.log("Bonus tuplana not available");
@@ -75,12 +75,11 @@ async function send_hokelanto(){
     )
 }
 
-module.exports = { send_hokelanto };
+module.exports = { send_hokelanto, read_hok_elanto };
 
 
+// async function main(){
+//     await send_hokelanto();
+// }
 
-async function main(){
-    await send_hokelanto();
-}
-
-main()
+// main()
