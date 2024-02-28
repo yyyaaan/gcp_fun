@@ -12,7 +12,10 @@ let schedule_hokelanto = [999];
 
 exports.main = (async(req, res) => {
     let cur_hour = await getHourAPI();
-    cur_hour = req.body ? parseInt(req.body.hour) : cur_hour;
+    req_hour = req.body ? parseInt(req.body.hour) : null;
+    if (req_hour !== null && req_hour < 24) {
+        cur_hour = req_hour
+    }
     let info = `Time${cur_hour}hr`;
 
     if(schedule_hokelanto.includes(cur_hour)){
